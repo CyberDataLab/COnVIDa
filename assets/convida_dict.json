@@ -1,0 +1,251 @@
+{
+  "description": {
+    "ES": "Herramienta de monitorización de datos de COVID19 en España, con agregación de información de diversas fuentes de datos y análisis por días y por regiones",
+    "EN": "COVID19 data monitoring tool in Spain, with information aggregation from different data sources and analysis by days and by regions"
+  },
+  "keywords": {
+    "ES": "convida, covid19, covid, coronavirus, datos, españa, casos, pcr, tests, fallecidos, gráfica, salud, economía, momo, movilidad, monitorización, visualización, análisis, rebrotes, cuarentena, prevención, pandemia, virus, murcia, universidad de murcia, umu, 2020, enfermedad, contagio, confinamiento, mascarilla, cyberdatalab, laboratorio de ciberseguridad y ciencia de datos, panel de control",
+    "EN": "convida, covid19, covid, coronavirus, data, spain, cases, pcr, tests, deaths, graph, health, economy, momo, mobility, monitorization, visualization, analysis, outbreak, quarantine, prevention, pandemic, virus, murcia, university of murcia, umu, 2020, desease, infection, confinement, mask, cyberdatalab, cybersecurity and data science laboratory, dashboard"
+  },
+  "title": {
+    "ES": "Monitorización de datos de COVID19 en España",
+    "EN": "COVID19 data monitoring in Spain"
+  },
+  "cyberdatalab": {
+    "ES": "Laboratorio de Ciberseguridad y Ciencia de Datos de la Universidad de Murcia",
+    "EN": "Cybersecurity and Data Science Laboratory at University of Murcia"
+  },
+  "date_range_label": {
+    "ES": "Fecha de inicio y fin",
+    "EN": "Start and end date"
+  },
+  "select_all_label": {
+    "ES": "Seleccionar todo",
+    "EN": "Select all"
+  },
+  "select_label": {
+    "ES": "Selecciona...",
+    "EN": "Select..."
+  },
+  "regions_label": {
+    "ES": "Regiones",
+    "EN": "Regions"
+  },
+  "analysis_type_label": {
+    "ES": "Tipo de análisis",
+    "EN": "Analysis type"
+  },
+  "temp_analysis_label": {
+    "ES": "Por días",
+    "EN": "By days"
+  },
+  "geo_analysis_label": {
+    "ES": "Por regiones",
+    "EN": "By regions"
+  },
+  "covid19_data_label": {
+    "ES": "Datos de COVID19",
+    "EN": "COVID19 data"
+  },
+  "ine_data_label": {
+    "ES": "Datos del INE",
+    "EN": "INE data"
+  },
+  "mobility_data_label": {
+    "ES": "Datos de Movilidad",
+    "EN": "Mobility data"
+  },
+  "momo_data_label": {
+    "ES": "Datos de MoMo",
+    "EN": "MoMo data"
+  },
+  "aemet_data_label": {
+    "ES": "Datos de AEMET",
+    "EN": "AEMET data"
+  },
+  "selected_regions_count_label": {
+    "ES": "Regiones seleccionadas",
+    "EN": "Selected regions"
+  },
+  "selected_covid19_count_label": {
+    "ES": "Ítems de datos de la COVID19",
+    "EN": "COVID19 data items"
+  },
+  "selected_ine_count_label": {
+    "ES": "Ítems de datos del INE",
+    "EN": "INE data items"
+  },
+  "selected_mobility_count_label": {
+    "ES": "Ítems de datos de Movilidad",
+    "EN": "Mobility data items"
+  },
+  "selected_momo_count_label": {
+    "ES": "Ítems de datos de MoMo",
+    "EN": "MoMo data items"
+  },
+  "selected_aemet_count_label": {
+    "ES": "Ítems de datos de la AEMET",
+    "EN": "AEMET data items"
+  },
+  "button_show_more": {
+    "ES": "Ver más fuentes de datos",
+    "EN": "Show more data sources"
+  },
+  "button_show_less": {
+    "ES": "Ver menos fuentes de datos",
+    "EN": "Show less data sources"
+  },
+  "last_update": {
+    "ES": "Actualizado a ",
+    "EN": "Last update at "
+  },
+  "spanish": {
+    "ES": "Español",
+    "EN": "Spanish"
+  },
+  "english": {
+    "ES": "Inglés",
+    "EN": "English"
+  },
+  "help_label": {
+    "ES": "Ayuda",
+    "EN": "Help"
+  },
+  "source_code": {
+    "ES": "Código fuente",
+    "EN": "Source code"
+  },
+  "temporal_visualization_label": {
+    "ES": "Visualización temporal",
+    "EN": "Temporal visualization"
+  },
+  "regional_visualization_label": {
+    "ES": "Visualización por regiones",
+    "EN": "Regional visualization"
+  },
+  "no_regions_selected_label": {
+    "ES": "No se han seleccionado regiones",
+    "EN": "No regions selected"
+  },
+
+  "no_data_selected_label": {
+    "ES": "No se han seleccionado datos",
+    "EN": "No data selected"
+  },
+  "no_temporal_data_selected_label": {
+    "ES": "No se han seleccionado datos temporales",
+    "EN": "No temporal data selected"
+  },
+  "graph_type_label": {
+    "ES": "Tipo de gráfica",
+    "EN": "Graph type"
+  },
+  "lines_graph_type_label": {
+    "ES": "Líneas",
+    "EN": "Lines"
+  },
+  "bars_graph_type_label": {
+    "ES": "Barras",
+    "EN": "Bars"
+  },
+  "boxes_graph_type_label": {
+    "ES": "Cajas y bigotes",
+    "EN": "Boxes"
+  },
+  "plot_scale_label": {
+    "ES": "Escala de la gráfica",
+    "EN": "Plot scale"
+  },
+  "plot_scale_linear_label": {
+    "ES": "Lineal",
+    "EN": "Linear"
+  },
+  "plot_scale_log_label": {
+    "ES": "Logarítimica",
+    "EN": "Logarithmic"
+  },
+  "save_raw_data_label": {
+    "ES": "Guardar datos",
+    "EN": "Save raw data"
+  },
+  "save_summary_data_label": {
+    "ES": "Guardar resumen",
+    "EN": "Save summary data"
+  },
+  "raw_data_table_label": {
+    "ES": "Tabla datos",
+    "EN": "Data table"
+  },
+  "summary_table_label": {
+    "ES": "Tabla resumen",
+    "EN": "Summary table"
+  },
+  "legend": {
+    "ES": "Leyenda",
+    "EN": "Legend"
+  },
+  "count-meaning": {
+    "ES": "Contador del número de ítems de datos",
+    "EN": "Counter of the number of data items"
+  },
+  "min-meaning": {
+    "ES": "Valor mínimo de los ítems de datos",
+    "EN": "Minimum value of the data items"
+  },
+  "max-meaning": {
+    "ES": "Valor máximo de los ítems de datos",
+    "EN": "Maximum value of the data items"
+  },
+  "mean-meaning": {
+    "ES": "Media artimética de los ítems de datos",
+    "EN": "Arithmetic mean of the data items"
+  },
+  "mean-wiki-link": {
+    "ES": "https://es.wikipedia.org/wiki/Media_aritm%C3%A9tica",
+    "EN": "https://en.wikipedia.org/wiki/Arithmetic_mean"
+  },
+  "std-meaning": {
+    "ES": "Desviación estándar de los ítems de datos",
+    "EN": "Standard deviation of the data items"
+  },
+  "std-wiki-link": {
+    "ES": "https://es.wikipedia.org/wiki/Desviaci%C3%B3n_t%C3%ADpica",
+    "EN": "https://en.wikipedia.org/wiki/Standard_deviation"
+  },
+  "percentile": {
+    "ES": "Percentil",
+    "EN": "Percentile"
+  },
+  "percentile-wiki-link": {
+    "ES": "https://es.wikipedia.org/wiki/Percentil",
+    "EN": "https://en.wikipedia.org/wiki/Percentile"
+  },
+  "median": {
+    "ES": "Mediana",
+    "EN": "Median"
+  },
+  "median-wiki-link": {
+    "ES": "https://es.wikipedia.org/wiki/Mediana_(estad%C3%ADstica)",
+    "EN": "https://en.wikipedia.org/wiki/Median"
+  },
+  "footer_1": {
+    "ES": "Proyecto desarrollado por el CyberDataLab de la Universidad de Murcia",
+    "EN": "Project developed by the CyberDataLab at the University of Murcia (Spain)"
+  },
+  "footer_2": {
+    "ES": "Contacte con nosotros a través de ",
+    "EN": "Contact us at "
+  },
+  "select_data_format_label": {
+    "ES": "Seleccionar formato de datos",
+    "EN": "Select data format"
+  },
+  "download": {
+    "ES": "Descargar",
+    "EN": "Download"
+  },
+  "close": {
+    "ES": "Cerrar",
+    "EN": "Close"
+  }
+}

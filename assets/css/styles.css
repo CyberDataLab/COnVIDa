@@ -1,0 +1,265 @@
+.js-plotly-plot .plotly .modebar {
+    margin-right: 3.5%;
+}
+
+body {
+    background-color: #f2f2f2;
+    margin: 1% 2%;
+}
+
+.DateRangePickerInput {
+    border: none;
+    background: none;
+}
+
+.two.columns {
+    width: 16.25%;
+}
+
+.column,
+.columns {
+}
+
+#last_update {
+    float:right;
+    margin-right: 20px;
+    margin-top: 8px;
+}
+#last_update h6 {
+    font-size: small;
+    margin-bottom: 0;
+}
+.lang_button, .help_button {
+    float: right;
+    height: 25px;
+    margin: 5px 10px 10px 0px;
+    cursor: pointer;
+}
+
+.pretty_container {
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    margin: 3px 10px 10px 10px;
+    padding: 15px;
+    position: relative;
+    box-shadow: 2px 2px 2px lightgrey;
+}
+
+.bare_container {
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+}
+
+.dcc_control {
+    margin: 0;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    width: calc(100% - 40px);
+}
+
+.control_label_class {
+}
+
+.control_label {
+    padding: 10px 10px 0px 10px;
+    width: calc(100% - 40px);
+    font-weight: bold;
+}
+
+
+.rc-slider {
+    margin-left: 0px;
+    padding-left: 0px;
+}
+
+.flex-display {
+    display: flex;
+}
+
+.container-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.data-source-container {
+    border-style: solid;
+    padding: 0px 0px 10px 20px;
+    margin: 10px 0px;
+    border-color: #d3d3d3;
+    border-width: 2px;
+}
+
+.data-source-icon {
+    height: 15px;
+    margin-right: 10px;
+}
+
+.select-all-button {
+    text-transform: none;
+    padding: 0px 10px;
+    line-height: 0px;
+    height: 28px;
+}
+
+.summary-table-legend-container {
+    font-size: smaller;
+    border-style: dotted;
+    border-color: #a9a9a9;
+    margin-top: 20px;
+    padding: 5px 20px 20px 20px;
+}
+
+.convida_footer {
+    text-align: center;
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top-style: solid;
+    border-top-width: 2px;
+    border-top-color: #d3d3d3;
+}
+
+.help_content {
+}
+
+.help_content h4, h5 {
+    margin-top: 25px;
+    font-weight: bold;
+}
+
+.help_content p {
+    text-indent: 20px;
+}
+
+.help_content img {
+    padding: 10px 0px 20px 0px;
+    width: 30%;
+}
+
+.help_content_toc {
+    margin-top: 25px;
+    font-weight: bold;
+    font-size: 2.2rem;
+    padding-left: 20px;
+}
+
+.help_content .help_content_toc ul {
+    margin: 5px 40px;
+}
+
+.DayPickerKeyboardShortcuts_show__bottomRight {
+    display: none;
+}
+
+#header {
+    align-items: center;
+}
+
+#learn-more-button {
+    text-align: center;
+    height: 100%;
+    padding: 0 20px;
+    text-transform: none;
+    font-size: 15px;
+    float: right;
+    margin-right: 10px;
+    margin-top: 30px;
+}
+
+.form-modal {
+    padding: 5px;
+}
+.button-modal {
+    height: 100px;
+}
+
+.container-button-modal {
+    display: flex;
+    flex-direction: column;
+}
+
+#title {
+    text-align: center;
+}
+
+.mini_container {
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    margin: 6px;
+    padding: 8px;
+    position: relative;
+    box-shadow: 2px 2px 2px lightgrey;
+    text-align: center;
+    width: 100%;
+}
+
+.mini_container h6 {
+    font-weight: bold;
+}
+
+@media all {
+    .mini_container {
+        height: 80%;
+    }
+}
+
+@media all and (min-width: 1700px) {
+    .mini_container {
+        height: inherit;
+    }
+}
+
+
+#right-column {
+    display: flex;
+    flex-direction: column;
+}
+
+
+#mainContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.cell-table {
+    table-layout: fixed;
+}
+
+.dash-table-container .dash-spreadsheet-container .dash-spreadsheet-inner td {
+    max-width: 600px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.dash-table-container .dash-spreadsheet-container .dash-spreadsheet-inner td.focused {
+}
+
+#button_show_more {
+    float: right;
+    text-transform: none;
+    padding: 0px 10px;
+    line-height: 0px;
+    height: 28px;
+}
+
+#button_show_less {
+    float: right;
+    text-transform: none;
+    padding: 0px 10px;
+    line-height: 0px;
+    height: 28px;
+}
+
+.tooltip-main {
+    /*width: 15px;*/
+    /*height: 15px;*/
+    background: #f6f6f6;
+    color: #323232;
+    margin: 4px 121px 0 5px;
+    /*float: right;*/
+    /*text-align: left !important;*/
+    border: 1px solid #e4e4e4;
+    border-radius: 5px;
+}
