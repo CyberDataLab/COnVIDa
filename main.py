@@ -66,7 +66,7 @@ if not DEBUG:
                     time.sleep(240)
                 if (nAttemps < 3):
                     f = open(os.path.join(FOLDER_LOGS, 'update.txt'), "w")
-                    last_update = dt.now().strftime('%d-%m-%Y, %H:%M:%S (GMT+1)')
+                    last_update = dt.now().strftime('%d-%m-%Y, %H:%M (GMT+1)')
                     f.write("{}".format(last_update))
                     f.close()
             except:
@@ -83,12 +83,19 @@ dash_app = dash.Dash(
     meta_tags=[
         {"name": "viewport", "content": "width=device-width"},
         {"name": "description", "content": convida_dict.get('description').get('ES')},
+        {"name": "title", "content": "COnVIDa - {}".format(convida_dict.get('title').get('ES'))},
         {"name": "keywords", "content": convida_dict.get('keywords').get('ES')},
         {"name": "robots", "content": "index, follow"},
         {"name": "googlebot", "content": "index, follow"},
         {"name": "bingbot", "content": "index, follow"},
-        {"property": "og:title", "content": convida_dict.get('title').get('ES')},
+        {"property": "og:title", "content": "COnVIDa - {}".format(convida_dict.get('title').get('ES'))},
         {"property": "og:image", "content": "https://convida.inf.um.es/assets/img/convida-icon.png"},
+        {"property": "og:url", "content": "https://convida.inf.um.es"},
+        {"property": "og:type", "content": "application/javascript"},
+        {"property": "og:site_name", "content": "COnVIDa"},
+        {"property": "og:image", "content": "https://convida.inf.um.es/assets/img/convida-icon.jpeg"},
+        {"property": "og:image:type", "content": "image/jpeg"},
+        {"property": "og:locale", "content": "es_ES"},
     ]
 )
 
@@ -1106,6 +1113,7 @@ def query_data(start_date, end_date, selected_regions,
         query['timestamp_date'] = dt.now().strftime('%Y-%m-%d')
         query['timestamp_time'] = dt.now().strftime('%H:%M')
         query['ip_address'] = request.environ['REMOTE_ADDR'] if request.environ.get('HTTP_X_FORWARDED_FOR') is None else request.environ['HTTP_X_FORWARDED_FOR']
+        query['user_agent'] = request.headers.get('User-Agent')
         query['language'] = language
         query['start_date'] = start_date
         query['end_date'] = end_date

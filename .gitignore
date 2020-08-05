@@ -5,6 +5,7 @@
 .idea/COnVIDa-dev.iml
 .idea/workspace.xml
 
+log/
 
 __pycache__/
 *.py[cod]
