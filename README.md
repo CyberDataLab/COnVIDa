@@ -137,11 +137,11 @@ def daily_update():
         try:
             while ((not convida_server.daily_update()) and (nAttemps < 3)):
                 nAttemps += 1
-                print(nAttemps)
                 time.sleep(240)
             if (nAttemps < 3):
-                f = open("/app/log/update.txt", "w")
-                f.write("Updated!")
+                f = open(os.path.join(FOLDER_LOGS, 'update.txt'), "w")
+                last_update = dt.now().strftime('%d-%m-%Y, %H:%M:%S (GMT+1)')
+                f.write("{}".format(last_update))
                 f.close()
         except:
             print("Thread Critical Error")
@@ -176,7 +176,7 @@ It contains the style files of the web page, as well as the images, the static H
 * The file _convida_dict.json_ contains the Spanish-English translation for each of the labels on the website. This dictionary allows easily including further languages in the future.
 
 ### ```tmp```
-The ```tmp``` folder at run time will contain the files ,in different formats, with the data you have selected. These files must be deleted periodically in order not to exceed the storage of the server. To this end, we launch a thread that checks and deletes the contents of this folder.
+The ```tmp``` folder at run time will contain the files, in different formats, with the data you have selected. These files must be deleted periodically in order not to exceed the storage of the server. To this end, we launch a thread that checks and deletes the contents of this folder.
 
 
 ### ```log```
@@ -204,4 +204,4 @@ CyberDataLab - [@cyberdatalab](https://twitter.com/cyberdatalab)
 
 Contact us through [convida@listas.um.es](mailto:convida@listas.um.es)
 
-Entire COnVIDa project: [https://github.com/CyberDataLab/COnVIDa-dev](https://github.com/CyberDataLab/COnVIDa-dev)
+Entire COnVIDa project: [https://github.com/CyberDataLab/COnVIDa-dev](https://github.com/CyberDataLab/COnVIDa)
