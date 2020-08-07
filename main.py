@@ -16,9 +16,12 @@ from flask import render_template, redirect, send_from_directory, request
 import copy
 import json
 from datetime import datetime as dt
+import datetime
 import os
 import uuid
 import sys
+import uwsgidecorators
+import time
 
 PORT = 8899
 # Developing: DEBUG = True
@@ -52,13 +55,20 @@ try:
 except:
     LAST_UPDATE = 'undefinied'
 
+TIME_UPDATE = datetime.time(3, 00, 00)
+TIME_UPDATE_D = datetime.timedelta(hours=TIME_UPDATE.hour, minutes=TIME_UPDATE.minute, seconds=TIME_UPDATE.second)
+
 if not DEBUG:
     @uwsgidecorators.postfork
     @uwsgidecorators.thread
     def daily_update():
         print("Starting Thread...")
         while True:
-            time.sleep(86400)  # 1 day
+            time_now = dt.now()
+            time_now_d = datetime.timedelta(hours=time_now.hour, minutes=time_now.minute, seconds=time_now.second)
+            time_left = TIME_UPDATE_D - time_now_d
+            print("Time left to run daily_update: {} seconds".format(time_left.seconds))
+            time.sleep(time_left.seconds)
             nAttemps = 0  # 3 attemps
             try:
                 while ((not convida_server.daily_update()) and (nAttemps < 3)):
@@ -89,12 +99,16 @@ dash_app = dash.Dash(
         {"name": "googlebot", "content": "index, follow"},
         {"name": "bingbot", "content": "index, follow"},
         {"property": "og:title", "content": "COnVIDa - {}".format(convida_dict.get('title').get('ES'))},
-        {"property": "og:image", "content": "https://convida.inf.um.es/assets/img/convida-icon.png"},
+        {"property": "og:description", "content": convida_dict.get('description').get('ES')},
+        {"property": "og:image", "content": "https://convida.inf.um.es/assets/img/convida-og.png"},
+        {"property": "og:image:secure_url", "content": "https://convida.inf.um.es/assets/img/convida-og.png"},
+        {"property": "og:image:type", "content": "image/png"},
+        {"property": "og:image:width", "content": "666"},
+        {"property": "og:image:height", "content": "666"},
         {"property": "og:url", "content": "https://convida.inf.um.es"},
-        {"property": "og:type", "content": "application/javascript"},
+        {"property": "og:type", "content": "website"},
+        {"property": "og:updated_time", "content": "1440432930"},
         {"property": "og:site_name", "content": "COnVIDa"},
-        {"property": "og:image", "content": "https://convida.inf.um.es/assets/img/convida-icon.jpeg"},
-        {"property": "og:image:type", "content": "image/jpeg"},
         {"property": "og:locale", "content": "es_ES"},
     ]
 )
