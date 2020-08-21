@@ -74,7 +74,7 @@
     width: 13.3333333333%;
   }
   .three.columns {
-    width: 22%;
+    width: 24.8%;
   }
   .four.columns {
     width: 30.6666666667%;
@@ -558,7 +558,7 @@ there.
     width: 16.25%;
   }
   .three.columns {
-    width: 22%;
+    width: 24.8%;
   }
   .four.columns {
     width: calc(100% / 3);
@@ -586,25 +586,8 @@ there.
     margin: 0 !important;
     margin-bottom: 25px !important;
   }
-  #individual_graph,
-  #count_graph,
-  #aggregate_graph {
-    position: static !important;
-  }
   .container-display {
     display: flex;
-  }
-  #wells,
-  #gas,
-  #oil {
-    margin-right: 10px;
-  }
-
-  #wells {
-    margin-left: 0px;
-  }
-  #water {
-    margin-right: 0px;
   }
   .mini_container {
     margin-bottom: 25px !important;
@@ -637,7 +620,7 @@ there.
     font-size: 2rem;
   }
   h6 {
-    font-size: 1.25rem;
+    font-size: 1.35rem;
   }
   p {
     font-size: 11px;

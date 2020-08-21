@@ -7,11 +7,6 @@ body {
     margin: 1% 2%;
 }
 
-.DateRangePickerInput {
-    border: none;
-    background: none;
-}
-
 .two.columns {
     width: 16.25%;
 }
@@ -66,7 +61,6 @@ body {
     font-weight: bold;
 }
 
-
 .rc-slider {
     margin-left: 0px;
     padding-left: 0px;
@@ -85,14 +79,33 @@ body {
 .data-source-container {
     border-style: solid;
     padding: 0px 0px 10px 20px;
-    margin: 10px 0px;
+    margin: 0px 1px 10px 1px;
     border-color: #d3d3d3;
-    border-width: 2px;
+    border-width: 1.5px;
 }
 
 .data-source-icon {
     height: 15px;
     margin-right: 10px;
+}
+
+.DayPickerKeyboardShortcuts_show__bottomRight {
+    display: none;
+}
+
+.DateRangePickerInput {
+    border: none;
+    background: none;
+}
+
+.DateInput {
+    width: 105px;
+}
+
+.data-retrieval-settings-container {
+    padding: 0px 0px 10px 20px;
+    margin: 0px 1px 10px 1px;
+    border-width: 1.5px;
 }
 
 .select-all-button {
@@ -145,10 +158,6 @@ body {
 
 .help_content .help_content_toc ul {
     margin: 5px 40px;
-}
-
-.DayPickerKeyboardShortcuts_show__bottomRight {
-    display: none;
 }
 
 #header {

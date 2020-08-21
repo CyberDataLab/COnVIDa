@@ -19,6 +19,10 @@
     "ES": "Fecha de inicio y fin",
     "EN": "Start and end date"
   },
+  "further_data_sources_label": {
+    "ES": "Más fuentes de datos",
+    "EN": "Further data sources"
+  },
   "select_all_label": {
     "ES": "Seleccionar todo",
     "EN": "Select all"
@@ -31,18 +35,6 @@
     "ES": "Regiones",
     "EN": "Regions"
   },
-  "analysis_type_label": {
-    "ES": "Tipo de análisis",
-    "EN": "Analysis type"
-  },
-  "temp_analysis_label": {
-    "ES": "Por días",
-    "EN": "By days"
-  },
-  "geo_analysis_label": {
-    "ES": "Por regiones",
-    "EN": "By regions"
-  },
   "covid19_data_label": {
     "ES": "Datos de COVID19",
     "EN": "COVID19 data"
@@ -50,6 +42,10 @@
   "ine_data_label": {
     "ES": "Datos del INE",
     "EN": "INE data"
+  },
+  "mobility": {
+    "ES": "Movilidad",
+    "EN": "Mobility"
   },
   "mobility_data_label": {
     "ES": "Datos de Movilidad",

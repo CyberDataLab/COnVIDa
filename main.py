@@ -351,54 +351,79 @@ def generate_data_retrieval_settings_panel(dropdown_options, language):
 
     return html.Div(
         [
-            html.Div(
-                [html.H6(convida_dict.get('date_range_label').get(language), className="control_label")],
-                className="control_label_class"),
-            dcc.DatePickerRange(
-                id='date-picker-range',
-                first_day_of_week=1,
-                day_size=43,
-                display_format='DD/MM/YYYY',
-                start_date=str(dt(2020, 2, 21))[0:10],
-                end_date=convida_server.get_max_date(),
-                min_date_allowed=convida_server.get_min_date(),
-                max_date_allowed=convida_server.get_max_date(),
-            ),
-            html.Div([html.H6(convida_dict.get('regions_label').get(language), className="control_label")],
-                     className="control_label_class"),
-            html.Button(convida_dict.get('select_all_label').get(language),
-                        id="select_all_regions_button",
-                        n_clicks=0,
-                        className="select-all-button",
+            html.Div([
+                html.Div(
+                    [
+                        html.H6(convida_dict.get('date_range_label').get(language), className="control_label"),
+                        dcc.DatePickerRange(
+                            id='date-picker-range',
+                            first_day_of_week=1,
+                            day_size=43,
+                            display_format='DD/MM/YYYY',
+                            start_date=str(dt(2020, 2, 21))[0:10],
+                            end_date=convida_server.get_max_date(),
+                            min_date_allowed=convida_server.get_min_date(),
+                            max_date_allowed=convida_server.get_max_date(),
                         ),
-            dcc.Dropdown(
-                id="selected_regions",
-                options=regions_options,
-                multi=True,
-                className="dcc_control",
-                placeholder=convida_dict.get('select_label').get(language)
-            ),
-            html.Div(
-                [
-                    html.H6([
-                        html.Img(src=dash_app.get_asset_url("img/covid19-icon.svg"),
-                                 className="data-source-icon"),
-                        convida_dict.get('covid19_data_label').get(language),
-                    ], className="control_label"),
-                    html.Button(convida_dict.get('select_all_label').get(language),
-                                id="select_all_covid19_button",
-                                n_clicks=0,
-                                className="select-all-button",
-                                ),
-                    dcc.Dropdown(
-                        id="selected_covid19",
-                        options=dropdown_options['COVID19'],
-                        multi=True,
-                        className="dcc_control",
-                        placeholder=convida_dict.get('select_label').get(language)
-                    ),
-                ],
-                className="data-source-container",
+                    ],
+                    className="data-retrieval-settings-container three columns",
+                ),
+                html.Div(
+                    [
+                        html.H6(convida_dict.get('regions_label').get(language), className="control_label"),
+                        html.Button(convida_dict.get('select_all_label').get(language),
+                                    id="select_all_regions_button",
+                                    n_clicks=0,
+                                    className="select-all-button",
+                                    ),
+                        dcc.Dropdown(
+                            id="selected_regions",
+                            options=regions_options,
+                            multi=True,
+                            className="dcc_control",
+                            placeholder=convida_dict.get('select_label').get(language)
+                        ),
+                    ],
+                    className="data-retrieval-settings-container three columns",
+                ),
+                html.Div(
+                    [
+                        html.H6([
+                            html.Img(src=dash_app.get_asset_url("img/covid19-icon.svg"),
+                                     className="data-source-icon"),
+                            convida_dict.get('covid19_data_label').get(language),
+                        ], className="control_label"),
+                        html.Button(convida_dict.get('select_all_label').get(language),
+                                    id="select_all_covid19_button",
+                                    n_clicks=0,
+                                    className="select-all-button",
+                                    ),
+                        dcc.Dropdown(
+                            id="selected_covid19",
+                            options=dropdown_options['COVID19'],
+                            multi=True,
+                            className="dcc_control",
+                            placeholder=convida_dict.get('select_label').get(language)
+                        ),
+                    ],
+                    className="data-source-container three columns",
+                ),
+                html.Div(
+                    [
+                        html.H6(convida_dict.get('further_data_sources_label').get(language), className="control_label"),
+                        dcc.Checklist(
+                            options=[
+                                {'label': 'INE', 'value': 'ine'},
+                                {'label': convida_dict.get('mobility').get(language), 'value': 'mobility'},
+                                {'label': 'MoMo', 'value': 'momo'},
+                                {'label': 'AEMET', 'value': 'aemet'},
+                            ],
+                            id="further-data-sources",
+                        ),
+                    ],
+                    className='data-retrieval-settings-container three columns',
+                ),
+            ],
             ),
             html.Div([
                 html.Div(
@@ -421,7 +446,9 @@ def generate_data_retrieval_settings_panel(dropdown_options, language):
                             placeholder=convida_dict.get('select_label').get(language)
                         ),
                     ],
-                    className="data-source-container",
+                    className="data-source-container three columns",
+                    id="ine-data-source-container",
+                    style={"display": "none"},
                 ),
                 html.Div(
                     [
@@ -443,7 +470,9 @@ def generate_data_retrieval_settings_panel(dropdown_options, language):
                             placeholder=convida_dict.get('select_label').get(language)
                         ),
                     ],
-                    className="data-source-container",
+                    className="data-source-container three columns",
+                    id="mobility-data-source-container",
+                    style={"display": "none"},
                 ),
                 html.Div(
                     [
@@ -465,7 +494,9 @@ def generate_data_retrieval_settings_panel(dropdown_options, language):
                             placeholder=convida_dict.get('select_label').get(language)
                         ),
                     ],
-                    className="data-source-container",
+                    className="data-source-container three columns",
+                    id="momo-data-source-container",
+                    style={"display": "none"},
                 ),
                 html.Div(
                     [
@@ -487,23 +518,18 @@ def generate_data_retrieval_settings_panel(dropdown_options, language):
                             placeholder=convida_dict.get('select_label').get(language)
                         ),
                     ],
-                    className="data-source-container",
+                    className="data-source-container three columns",
+                    id="aemet-data-source-container",
+                    style={"display": "none"},
                 ),
             ],
-                id="button_show_hide_container",
-                style={"display": "none"}
+                id="further_data_sources_container",
             ),
-            html.Div(
-                [
-                    html.Button(convida_dict.get('button_show_more').get(language), id='button_show_more'),
-                    html.Button(convida_dict.get('button_show_less').get(language), id='button_show_less',
-                                style={"display": "none"})
-                ],
-                id='buttons_show_hide')
 
         ],
-        className="pretty_container four columns",
-        id="cross-filter-options",
+        className="pretty_container",
+        id="data-retrieval-settings-panel",
+        style={"display": "grid"},
     )
 
 
@@ -796,7 +822,7 @@ def generate_graph_and_table_containers(language, graph_type):
             generate_graph_container(language, graph_type),
             generate_graph_settings_container(language, graph_type),
             generate_table_container(language, graph_type),
-        ]
+        ],
     )
 
 
@@ -838,21 +864,11 @@ def generate_layout(language):
 
             generate_header(language),
             generate_laguage_bar(language),
+            generate_data_retrieval_settings_panel(dropdown_options, language),
 
-            html.Div(
-                [
-                    generate_data_retrieval_settings_panel(dropdown_options, language),
-                    html.Div(
-                        [
-                            generate_graph_and_table_containers(language, "temporal"),
-                            generate_graph_and_table_containers(language, "regional"),
-                        ],
-                        id="right-column",
-                        className="eight columns",
-                    ),
-                ],
-                className="row flex-display",
-            ),
+            generate_graph_and_table_containers(language, "temporal"),
+            generate_graph_and_table_containers(language, "regional"),
+
             html.Footer(
                 [
                     html.Div(html.H6(convida_dict.get('footer_1').get(language))),
@@ -906,26 +922,30 @@ for dataSource in ["COVID19", "Mobility", "INE", "MoMo", "AEMET"]:
 
 @dash_app.callback(
     [
-        Output('button_show_hide_container', 'style'),
-        Output('button_show_more', 'style'),
-        Output('button_show_less', 'style')
+        Output('ine-data-source-container', 'style'),
+        Output('mobility-data-source-container', 'style'),
+        Output('momo-data-source-container', 'style'),
+        Output('aemet-data-source-container', 'style'),
     ],
     [
-        Input('button_show_more', 'n_clicks'),
-        Input('button_show_less', 'n_clicks')
+        Input('further-data-sources', 'value'),
     ],
-    [
-        State("LANG", "data"),
-    ]
 )
-def button_toggle(n_clicks_more, n_clicks_less, language):
-    ctx = dash.callback_context
-    button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+def toggle_further_data_sources(selected_further_data_sources):
+    none = {'display': 'none'}
+    block = {'display': 'block'}
 
-    if button_id == "button_show_more":
-        return {'display': 'block'}, {'display': 'none'}, {'display': 'block'}
-    else:
-        return {'display': 'none'}, {'display': 'block'}, {'display': 'none'}
+    if selected_further_data_sources is None:
+        return none, none, none, none
+
+    output = []
+    for data_source in ["ine", "mobility", "momo", "aemet"]:
+        if data_source in selected_further_data_sources:
+            output.append(block)
+        else:
+            output.append(none)
+
+    return output
 
 
 def update_graph_and_table(start_date, end_date,
