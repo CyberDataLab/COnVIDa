@@ -20,7 +20,7 @@ import datetime
 import os
 import uuid
 import sys
-import uwsgidecorators
+#import uwsgidecorators
 import time
 
 PORT = 8899
@@ -55,7 +55,7 @@ try:
 except:
     LAST_UPDATE = 'undefinied'
 
-TIME_UPDATE = datetime.time(3, 00, 00)
+TIME_UPDATE = datetime.time(2, 00, 00)
 TIME_UPDATE_D = datetime.timedelta(hours=TIME_UPDATE.hour, minutes=TIME_UPDATE.minute, seconds=TIME_UPDATE.second)
 
 if not DEBUG:
