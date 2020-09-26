@@ -111,6 +111,10 @@
     "ES": "Código fuente",
     "EN": "Source code"
   },
+  "share": {
+    "ES": "Compartir",
+    "EN": "Share"
+  },
   "temporal_visualization_label": {
     "ES": "Visualización temporal",
     "EN": "Temporal visualization"

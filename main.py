@@ -20,14 +20,14 @@ import datetime
 import os
 import uuid
 import sys
-#import uwsgidecorators
+# import uwsgidecorators
 import time
+from urllib.parse import urlparse, parse_qs, urlencode
 
 PORT = 8899
 # Developing: DEBUG = True
 # Production: DEBUG = False
 DEBUG = True
-
 
 ## Add convida lib and convida server lib to path
 
@@ -268,7 +268,7 @@ def generate_header(language):
     )
 
 
-def generate_laguage_bar(language):
+def generate_language_bar(language):
     """Creates and returns the HTML code for the languages bar of the dashboard
 
     Parameters
@@ -410,7 +410,8 @@ def generate_data_retrieval_settings_panel(dropdown_options, language):
                 ),
                 html.Div(
                     [
-                        html.H6(convida_dict.get('further_data_sources_label').get(language), className="control_label"),
+                        html.H6(convida_dict.get('further_data_sources_label').get(language),
+                                className="control_label"),
                         dcc.Checklist(
                             options=[
                                 {'label': 'INE', 'value': 'ine'},
@@ -524,6 +525,21 @@ def generate_data_retrieval_settings_panel(dropdown_options, language):
                 ),
             ],
                 id="further_data_sources_container",
+            ),
+            html.Div([
+                html.Img(
+                    src=dash_app.get_asset_url("img/share.png"),
+                    id="share_button",
+                    n_clicks=0,
+                    className="help_button",
+                    title=convida_dict.get('share').get(language),
+                ),
+                html.Div(
+                    id="share_bar",
+                    style={"float": "right"}
+                ),
+            ],
+                id="share_container",
             ),
 
         ],
@@ -801,7 +817,7 @@ def generate_graph_and_table_containers(language, graph_type):
     language : str
         The language to be used (e.g., 'ES' or 'EN')
     graph_type : str
-        The type of graph (and table) to be generated (e.g., 
+        The type of graph (and table) to be generated (e.g.,
         'temporal' or 'regional')
 
     Returns
@@ -849,6 +865,9 @@ def generate_layout(language):
 
     return html.Div(
         [
+            dcc.Location(id='url', refresh=False),
+            dcc.Store(id="share_temporal", data=None),
+            dcc.Store(id="share_regional", data=None),
             dcc.Store(id="LANG", data=language, storage_type="local"),
             dcc.Store(id="temporal_query_params", data=None),
             dcc.Store(id="regional_query_params", data=None),
@@ -863,7 +882,7 @@ def generate_layout(language):
             html.Div(id="output-clientside"),
 
             generate_header(language),
-            generate_laguage_bar(language),
+            generate_language_bar(language),
             generate_data_retrieval_settings_panel(dropdown_options, language),
 
             generate_graph_and_table_containers(language, "temporal"),
@@ -897,25 +916,99 @@ def set_language(n_clicks_es, n_clicks_en):
 
 
 @dash_app.callback(
-    Output("selected_regions", "value"),
-    [Input("select_all_regions_button", "n_clicks")],
+    Output("share_bar", "children"),
+    [Input("share_button", "n_clicks")],
+    [State("share_temporal", "data")]
 )
-def select_all_regions(n_clicks):
-    if n_clicks > 0:
-        return [dropdown_option.get("label") for dropdown_option in regions_options]
-    return []
+def gen_share_url(share_button, data):
+    if share_button > 0:
+        if data is not None:
+            data.pop('analysis_type')
+            data.pop('language')  # Incompatible with ES-EN parameters.
+            data.pop('selected_plot_scale')  # Default representation in graphs (for now)
+            data.pop('selected_graph_type')  # Default representation in graphs (for now)
+            output = urlencode(data, doseq=True)
+            output = f'http://localhost:8899/?{output}'
+            return html.Div(html.H6(output, style={"font-size": "0.8rem"}),
+                            style={"margin-right": "10px", "margin-top": "13px"})
+    return None
 
 
-def select_all_data_items(n_clicks, dropdown_options, dataSource):
-    if n_clicks > 0:
-        return [dropdown_option.get("label") for dropdown_option in dropdown_options[dataSource]]
-    return []
+def parse_url(url):
+    """
+
+    Parameters
+    ----------
+    url
+        URL requested by the browser
+
+    Returns
+    -------
+        Dict with the parameters and values of the URL
+    """
+    parse_result = urlparse(url)
+    return parse_qs(parse_result.query)
+
+
+@dash_app.callback([Output("date-picker-range", "start_date"), Output("date-picker-range", "end_date"),
+                    Output('further-data-sources', 'value')],
+                   [Input('url', 'search')])
+def share_url(search):
+    if search:
+        state = parse_url(search)
+        aux = []
+        for i in state.keys():
+            if 'ine' in i:
+                aux.append('ine')
+            elif 'mobility' in i:
+                aux.append('mobility')
+            elif 'momo' in i:
+                aux.append('momo')
+            elif 'aemet' in i:
+                aux.append('aemet')
+        return state.get('start_date', '')[0], state.get('end_date', '')[0], aux
+    else:
+        return str(dt(2020, 2, 21))[0:10], convida_server.get_max_date(), []
+
+
+@dash_app.callback(
+    Output("selected_regions", "value"),
+    [Input("select_all_regions_button", "n_clicks"), Input('url', 'search')],
+)
+def select_all_regions(n_clicks, search):
+    input_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+    if input_id == 'select_all_regions_button':
+        if n_clicks > 0:
+            return [dropdown_option.get("label") for dropdown_option in regions_options]
+        return []
+    if search:
+        state = parse_url(search)
+        return state.get('selected_regions', '')
+    else:
+        return []
+
+
+def select_all_data_items(n_clicks, search, dropdown_options, dataSource):
+    input_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+    if input_id in ['select_all_{}_button'.format(i) for i in ['covid19', 'mobility', 'ine', 'momo', 'aemet']]:
+        if n_clicks > 0:
+            return [dropdown_option.get("label") for dropdown_option in dropdown_options[dataSource]]
+        return []
+    if search:
+        state = parse_url(search)
+        aux = []
+        for i in state.keys():
+            if i == 'selected_{}'.format(dataSource.lower()):
+                aux.extend(state[i])
+        return aux
+    else:
+        return []
 
 
 for dataSource in ["COVID19", "Mobility", "INE", "MoMo", "AEMET"]:
     dash_app.callback(
         Output("selected_{}".format(dataSource.lower()), "value"),
-        [Input("select_all_{}_button".format(dataSource.lower()), "n_clicks")],
+        [Input("select_all_{}_button".format(dataSource.lower()), "n_clicks"), Input('url', 'search')],
         [State("dropdown_options", "data")]
     )(partial(select_all_data_items, dataSource=dataSource))
 
@@ -929,21 +1022,43 @@ for dataSource in ["COVID19", "Mobility", "INE", "MoMo", "AEMET"]:
     ],
     [
         Input('further-data-sources', 'value'),
+        Input('url', 'search'),
     ],
 )
-def toggle_further_data_sources(selected_further_data_sources):
+def toggle_further_data_sources(selected_further_data_sources, search):
     none = {'display': 'none'}
     block = {'display': 'block'}
-
-    if selected_further_data_sources is None:
-        return none, none, none, none
-
     output = []
-    for data_source in ["ine", "mobility", "momo", "aemet"]:
-        if data_source in selected_further_data_sources:
-            output.append(block)
-        else:
-            output.append(none)
+    if search:
+        state = parse_url(search)
+        output = [{'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}]
+        for i in state.keys():
+            if i == 'selected_ine':
+                output[0] = {'display': 'block'}
+            elif i == 'selected_mobility':
+                output[1] = {'display': 'block'}
+            elif i == 'selected_momo':
+                output[2] = {'display': 'block'}
+            elif i == 'selected_aemet':
+                output[3] = {'display': 'block'}
+        if selected_further_data_sources is not None:
+            if 'ine' in selected_further_data_sources:
+                output[0] = {'display': 'block'}
+            if 'mobility' in selected_further_data_sources:
+                output[1] = {'display': 'block'}
+            if 'momo' in selected_further_data_sources:
+                output[2] = {'display': 'block'}
+            if 'aemet' in selected_further_data_sources:
+                output[3] = {'display': 'block'}
+    else:
+        if selected_further_data_sources is None:
+            return none, none, none, none
+
+        for data_source in ["ine", "mobility", "momo", "aemet"]:
+            if data_source in selected_further_data_sources:
+                output.append(block)
+            else:
+                output.append(none)
 
     return output
 
@@ -1002,11 +1117,12 @@ def update_graph_and_table(start_date, end_date,
     list
         the list of query parameters to be stored in a Dash Store
     """
+    # print(f'{start_date} {end_date} {selected_regions} {selected_covid19} {language}')
+    params = locals()
 
     layout_graph = copy.deepcopy(empty_graph_layout)
     selected_temporal_data_items = selected_covid19 + selected_mobility + selected_momo + selected_aemet
     selected_data_items = selected_temporal_data_items + selected_ine
-
     # No data to plot
     if ((len(selected_regions) == 0) or (len(selected_data_items) == 0) or
             ((len(selected_temporal_data_items) == 0) and (analysis_type == 'temporal'))):
@@ -1021,7 +1137,7 @@ def update_graph_and_table(start_date, end_date,
         layout_graph["annotations"] = [empty_graph_annotation]
 
         figure = dict(data=[], layout=layout_graph)
-        output = [figure, [], {"display": "none"}, []]
+        output = [params, figure, [], {"display": "none"}, []]
         return output
 
     layout_graph["dragmode"] = "select"
@@ -1030,8 +1146,7 @@ def update_graph_and_table(start_date, end_date,
 
     layout_graph["yaxis"]["type"] = 'linear' if selected_plot_scale == 'Linear' else 'log'
     graph_type = "scatter" if selected_graph_type == 'lines' else "bar"
-    logging = True if analysis_type == 'temporal' else False #To avoid double logging
-
+    logging = True if analysis_type == 'temporal' else False  # To avoid double logging
     dfQuery = query_data(start_date, end_date, selected_regions,
                          selected_temporal_data_items,
                          selected_ine,
@@ -1053,15 +1168,16 @@ def update_graph_and_table(start_date, end_date,
     graph = dict(data=data, layout=copy.deepcopy(layout_graph))
     table = get_summary_table(dfQuery)
 
-    output = [graph, table, {"display": "block"},
-            [start_date, end_date, selected_regions,
-            selected_temporal_data_items, selected_ine]]
+    output = [params, graph, table, {"display": "block"},
+              [start_date, end_date, selected_regions,
+               selected_temporal_data_items, selected_ine]]
     return output
 
 
 for analysis_type in ('temporal', 'regional'):
     dash_app.callback(
         [
+            Output("share_{}".format(analysis_type), "data"),
             Output("{}_graph".format(analysis_type), "figure"),
             Output("{}-summary-table".format(analysis_type), "children"),
             Output("{}-summary-table-container".format(analysis_type), "style"),
@@ -1118,7 +1234,6 @@ def query_data(start_date, end_date, selected_regions,
     DataFrame
         a DataFrame containing all the queried data items
     """
-
     start = pd.to_datetime(start_date)
     end = pd.to_datetime(end_date)
 
@@ -1146,7 +1261,8 @@ def query_data(start_date, end_date, selected_regions,
         query = dict()
         query['timestamp_date'] = dt.now().strftime('%Y-%m-%d')
         query['timestamp_time'] = dt.now().strftime('%H:%M')
-        query['ip_address'] = request.environ['REMOTE_ADDR'] if request.environ.get('HTTP_X_FORWARDED_FOR') is None else request.environ['HTTP_X_FORWARDED_FOR']
+        query['ip_address'] = request.environ['REMOTE_ADDR'] if request.environ.get('HTTP_X_FORWARDED_FOR') is None else \
+            request.environ['HTTP_X_FORWARDED_FOR']
         query['user_agent'] = request.headers.get('User-Agent')
         query['language'] = language
         query['start_date'] = start_date
@@ -1274,9 +1390,12 @@ def toggle_modal_save_raw_data(n1, n2, is_open, query_params, language, table_ty
 
 for table_type in ("temporal", "regional"):
     dash_app.callback(
-        [Output("{}-modal-raw-data-table".format(table_type), "is_open"), Output("download-area-{}-modal-raw-data-table".format(table_type), "children")],
-        [Input("{}-save-raw-data-button".format(table_type), "n_clicks"), Input("close-{}-modal-raw-data-table".format(table_type), "n_clicks")],
-        [State("{}-modal-raw-data-table".format(table_type), "is_open"), State("{}_query_params".format(table_type), "data"), State("LANG", "data")],
+        [Output("{}-modal-raw-data-table".format(table_type), "is_open"),
+         Output("download-area-{}-modal-raw-data-table".format(table_type), "children")],
+        [Input("{}-save-raw-data-button".format(table_type), "n_clicks"),
+         Input("close-{}-modal-raw-data-table".format(table_type), "n_clicks")],
+        [State("{}-modal-raw-data-table".format(table_type), "is_open"),
+         State("{}_query_params".format(table_type), "data"), State("LANG", "data")],
     )(partial(toggle_modal_save_raw_data, table_type=table_type))
 
 
@@ -1338,9 +1457,12 @@ def toggle_modal_save_summary_table(n1, n2, is_open, query_params, language, tab
 
 for table_type in ("temporal", "regional"):
     dash_app.callback(
-        [Output("{}-modal-summary-table".format(table_type), "is_open"), Output("download-area-{}-modal-summary-table".format(table_type), "children")],
-        [Input("{}-save-summary-table-button".format(table_type), "n_clicks"), Input("close-{}-modal-summary-table".format(table_type), "n_clicks")],
-        [State("{}-modal-summary-table".format(table_type), "is_open"), State("{}_query_params".format(table_type), "data"), State("LANG", "data")],
+        [Output("{}-modal-summary-table".format(table_type), "is_open"),
+         Output("download-area-{}-modal-summary-table".format(table_type), "children")],
+        [Input("{}-save-summary-table-button".format(table_type), "n_clicks"),
+         Input("close-{}-modal-summary-table".format(table_type), "n_clicks")],
+        [State("{}-modal-summary-table".format(table_type), "is_open"),
+         State("{}_query_params".format(table_type), "data"), State("LANG", "data")],
     )(partial(toggle_modal_save_summary_table, table_type=table_type))
 
 
