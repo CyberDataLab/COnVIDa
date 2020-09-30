@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_restful import Resource, Api, reqparse
 import os, sys
+import json
 
 ## Add convida lib and convida server lib to path
 
@@ -51,6 +52,7 @@ parser.add_argument('start_date', type=str)
 parser.add_argument('end_date', type=str)
 parser.add_argument('lang', type=str)
 
+
 class TestPost(Resource):
     def post(self):
         """JSON Example
@@ -88,14 +90,13 @@ class TestPost(Resource):
                                                      end_date=end_date, language=args['lang'])
 
                 index = set(data.columns.get_level_values(0))
-                json = "{"
+                json_out = {}
 
                 for region in index:
-                    json = json + "{\"" + region + "\":" + data[region].to_json( default_handler=dict) + "},"
+                    json_out[region] = json.dumps(json.loads(data[region].to_json(default_handler=dict)),
+                                                  sort_keys=True)
 
-                json = json + "}"
-
-                return json
+                return json_out
             else:
                 return "data_type error", 400
         elif data_type == 'Regional' or data_type == 'regional':
@@ -105,17 +106,18 @@ class TestPost(Resource):
                                                      language=args['lang'])
 
                 index = set(data.columns.get_level_values(0))
-                json = "{"
+                json_out = {}
 
                 for region in index:
-                    json = json + "{\"" + region + "\":" + data[region].to_json( default_handler=dict) + "}"
+                    json_out[region] = json.dumps(json.loads(data[region].to_json(default_handler=dict)),
+                                                  sort_keys=True)
 
-                json = json + "}"
-                return json
+                return json_out
             else:
                 return "data_type error", 400
         else:
             return "Not allowed", 400
+
 
 class Test2(Resource):
     def get(self):
