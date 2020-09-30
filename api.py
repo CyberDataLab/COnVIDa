@@ -86,7 +86,16 @@ class TestPost(Resource):
                                                      regions=args['regions'],
                                                      start_date=start_date,
                                                      end_date=end_date, language=args['lang'])
-                return data.to_json(orient='split', default_handler=dict)
+
+                index = set(data.columns.get_level_values(0))
+                json = "{"
+
+                for region in index:
+                    json = json + "{\"" + region + "\":" + data[region].to_json( default_handler=dict) + "},"
+
+                json = json + "}"
+
+                return json
             else:
                 return "data_type error", 400
         elif data_type == 'Regional' or data_type == 'regional':
@@ -94,7 +103,15 @@ class TestPost(Resource):
                 data = convida_server.get_data_items(data_items=args['data'],
                                                      regions=args['regions'],
                                                      language=args['lang'])
-                return data.to_json(orient='split', default_handler=dict)
+
+                index = set(data.columns.get_level_values(0))
+                json = "{"
+
+                for region in index:
+                    json = json + "{\"" + region + "\":" + data[region].to_json( default_handler=dict) + "}"
+
+                json = json + "}"
+                return json
             else:
                 return "data_type error", 400
         else:
