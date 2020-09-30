@@ -13,6 +13,7 @@ from functools import partial
 import pandas as pd
 import flask
 from flask import render_template, redirect, send_from_directory, request
+from api import init_api
 import copy
 import json
 from datetime import datetime as dt
@@ -118,6 +119,7 @@ dash_app.scripts.append_script({
     'external_url': 'https://www.googletagmanager.com/gtag/js?id=UA-166292510-1'
 })
 
+init_api(app)
 
 @app.route('/help')
 def help_en():
