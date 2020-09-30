@@ -35,7 +35,7 @@ def init_api(app):
     api = Api(app, prefix='/api', default_mediatype='application/json')
     api.add_resource(Test, '/test')
     api.add_resource(Test2, '/test2')
-    api.add_resource(TestPost, '/testpost')
+    api.add_resource(TestPost, '')
 
 
 class Test(Resource):
@@ -46,8 +46,10 @@ class Test(Resource):
 parser = reqparse.RequestParser()
 parser.add_argument('data', type=list, location='json')
 parser.add_argument('regions', type=list, location='json')
+parser.add_argument('data_type', type=str)
 parser.add_argument('start_date', type=str)
 parser.add_argument('end_date', type=str)
+parser.add_argument('lang', type=str)
 
 class TestPost(Resource):
     def post(self):
@@ -57,28 +59,42 @@ class TestPost(Resource):
         regions -> ['Murcia']
         start_date -> 2020-01-01
         end_date -> 2020-05-13
+        datatype -> Temporal/Regional
+        lang -> ES
+
 
         Returns
         -------
 
         """
-        datasources = COnVIDa.get_data_items_names(DataType.TEMPORAL, language='EN')
-        all_data_items = []
-        for data_items in datasources.values():
-            all_data_items += data_items
+
 
         request.get_json(force=True)
         args = parser.parse_args()
+        datasources_regional = COnVIDa.get_data_items_names(DataType.GEOGRAPHICAL, language=args['lang'])
+        data_type = args['data_type']
+        if data_type == 'Temporal' or 'temporal':
+            if any(x in datasources_regional for x in args['data']):
+                start_date = pd.to_datetime(str(args['start_date']), format='%Y-%m-%d')
+                end_date = pd.to_datetime(str(args['end_date']), format='%Y-%m-%d')
 
-        start_date = pd.to_datetime(str(args['start_date']), format='%Y-%m-%d')
-        end_date = pd.to_datetime(str(args['end_date']), format='%Y-%m-%d')
-
-        data = convida_server.get_data_items(data_items=args['data'],
-                                             regions=args['regions'],
-                                             start_date=start_date,
-                                             end_date=end_date, language='EN')
-
-        return data.to_json(orient='split', default_handler=dict)
+                data = convida_server.get_data_items(data_items=args['data'],
+                                                     regions=args['regions'],
+                                                     start_date=start_date,
+                                                     end_date=end_date, language=args['lang'])
+                return data.to_json(orient='split', default_handler=dict)
+            else:
+                return "data_type error", 400
+        elif data_type == 'Regional' or 'regional':
+            if any(x in list(datasources_regional.values())[0] for x in args['data']):
+                data = convida_server.get_data_items(data_items=args['data'],
+                                                     regions=args['regions'],
+                                                     language=args['lang'])
+                return data.to_json(orient='split', default_handler=dict)
+            else:
+                return "data_type error", 400
+        else:
+            return "Not allowed", 400
 
 class Test2(Resource):
     def get(self):
