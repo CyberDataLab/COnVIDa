@@ -68,13 +68,17 @@ class TestPost(Resource):
 
         """
 
-
         request.get_json(force=True)
         args = parser.parse_args()
         datasources_regional = COnVIDa.get_data_items_names(DataType.GEOGRAPHICAL, language=args['lang'])
+        datasources_temporal = COnVIDa.get_data_items_names(DataType.TEMPORAL, language=args['lang'])
+        datasources_temporal_indiv = []
+        for i in datasources_temporal.values():
+            for j in i:
+                datasources_temporal_indiv.append(j)
         data_type = args['data_type']
-        if data_type == 'Temporal' or 'temporal':
-            if any(x in datasources_regional for x in args['data']):
+        if data_type == 'Temporal' or data_type == 'temporal':
+            if all(elem in datasources_temporal_indiv for elem in args['data']):
                 start_date = pd.to_datetime(str(args['start_date']), format='%Y-%m-%d')
                 end_date = pd.to_datetime(str(args['end_date']), format='%Y-%m-%d')
 
@@ -85,8 +89,8 @@ class TestPost(Resource):
                 return data.to_json(orient='split', default_handler=dict)
             else:
                 return "data_type error", 400
-        elif data_type == 'Regional' or 'regional':
-            if any(x in list(datasources_regional.values())[0] for x in args['data']):
+        elif data_type == 'Regional' or data_type == 'regional':
+            if all(elem in list(datasources_regional.values())[0] for elem in args['data']):
                 data = convida_server.get_data_items(data_items=args['data'],
                                                      regions=args['regions'],
                                                      language=args['lang'])
