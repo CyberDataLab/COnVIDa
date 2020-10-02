@@ -83,7 +83,7 @@ if not DEBUG:
             except:
                 print("Thread Critical Error")
 
-PATH = os.path.dirname(__file__)
+PATH = os.path.dirname(os.path.abspath(__file__))
 with open(PATH + '/assets/convida_dict.json', encoding='utf8') as json_file:
     convida_dict = json.load(json_file)
 
