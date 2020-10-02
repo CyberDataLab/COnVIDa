@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import request
 from flask_restful import Resource, Api, reqparse
 import os, sys
 import json
@@ -34,104 +34,93 @@ def init_api(app):
 
     """
     api = Api(app, prefix='/api', default_mediatype='application/json')
-    api.add_resource(Test, '/test')
-    api.add_resource(Test2, '/test2')
-    api.add_resource(TestPost, '')
-
-
-class Test(Resource):
-    def get(self):
-        return {'test': 'enrique'}
+    api.add_resource(DefaultRequest, '')
+    api.add_resource(TemporalRequest, '/temporal')
+    api.add_resource(RegionalRequest, '/regional')
 
 
 parser = reqparse.RequestParser()
 parser.add_argument('data', type=list, location='json')
 parser.add_argument('regions', type=list, location='json')
-parser.add_argument('data_type', type=str)
 parser.add_argument('start_date', type=str)
 parser.add_argument('end_date', type=str)
-parser.add_argument('lang', type=str)
 
 
-class TestPost(Resource):
+class DefaultRequest(Resource):
     def post(self):
-        """JSON Example
 
-        data -> ['Daily cases', 'Daily PCR cases']
-        regions -> ['Murcia']
-        start_date -> 2020-01-01
-        end_date -> 2020-05-13
-        datatype -> Temporal/Regional
-        lang -> ES
+        return 'Usage -> http://localhost:8899/api/[temporal|regional]', 400
 
 
-        Returns
-        -------
-
-        """
+class TemporalRequest(Resource):
+    def post(self):
 
         request.get_json(force=True)
         args = parser.parse_args()
-        datasources_regional = COnVIDa.get_data_items_names(DataType.GEOGRAPHICAL, language=args['lang'])
-        datasources_temporal = COnVIDa.get_data_items_names(DataType.TEMPORAL, language=args['lang'])
-        datasources_temporal_indiv = []
-        for i in datasources_temporal.values():
+
+        datasources_temporal_es = COnVIDa.get_data_items_names(DataType.TEMPORAL, language='ES')
+        datasources_temporal_es_indiv = []
+        for i in datasources_temporal_es.values():
             for j in i:
-                datasources_temporal_indiv.append(j)
-        data_type = args['data_type']
-        if data_type == 'Temporal' or data_type == 'temporal':
-            if all(elem in datasources_temporal_indiv for elem in args['data']):
-                start_date = pd.to_datetime(str(args['start_date']), format='%Y-%m-%d')
-                end_date = pd.to_datetime(str(args['end_date']), format='%Y-%m-%d')
+                datasources_temporal_es_indiv.append(j)
 
-                data = convida_server.get_data_items(data_items=args['data'],
-                                                     regions=args['regions'],
-                                                     start_date=start_date,
-                                                     end_date=end_date, language=args['lang'])
+        datasources_temporal_en = COnVIDa.get_data_items_names(DataType.TEMPORAL, language='EN')
+        datasources_temporal_en_indiv = []
+        for i in datasources_temporal_en.values():
+            for j in i:
+                datasources_temporal_en_indiv.append(j)
 
-                index = set(data.columns.get_level_values(0))
-                json_out = {}
-
-                for region in index:
-                    json_out[region] = json.dumps(json.loads(data[region].to_json(default_handler=dict)),
-                                                  sort_keys=True)
-
-                return json_out
-            else:
-                return "data_type error", 400
-        elif data_type == 'Regional' or data_type == 'regional':
-            if all(elem in list(datasources_regional.values())[0] for elem in args['data']):
-                data = convida_server.get_data_items(data_items=args['data'],
-                                                     regions=args['regions'],
-                                                     language=args['lang'])
-
-                index = set(data.columns.get_level_values(0))
-                json_out = {}
-
-                for region in index:
-                    json_out[region] = json.dumps(json.loads(data[region].to_json(default_handler=dict)),
-                                                  sort_keys=True)
-
-                return json_out
-            else:
-                return "data_type error", 400
+        if all(elem in datasources_temporal_es_indiv for elem in args['data']):
+            lang = 'ES'
+        elif all(elem in datasources_temporal_en_indiv for elem in args['data']):
+            lang = 'EN'
         else:
-            return "Not allowed", 400
+            return "data_type error", 400
 
+        start_date = pd.to_datetime(str(args['start_date']), format='%Y-%m-%d')
+        end_date = pd.to_datetime(str(args['end_date']), format='%Y-%m-%d')
 
-class Test2(Resource):
-    def get(self):
-        all_regions = Regions.get_regions('ES')
-        datasources = COnVIDa.get_data_items_names(DataType.TEMPORAL, language='EN')
-        all_data_items = []
-        for data_items in datasources.values():
-            all_data_items += data_items
-        start_date = pd.to_datetime('2020-01-01', format='%Y-%m-%d')
-        end_date = pd.to_datetime('2020-05-13', format='%Y-%m-%d')
-
-        data = convida_server.get_data_items(data_items=[all_data_items[0]],
-                                             regions=[all_regions[5]],
+        data = convida_server.get_data_items(data_items=args['data'],
+                                             regions=args['regions'],
                                              start_date=start_date,
-                                             end_date=end_date, language='EN')
+                                             end_date=end_date, language=lang)
 
-        return data.to_json(orient='split', default_handler=dict)
+        index = set(data.columns.get_level_values(0))
+        json_out = {}
+
+        for region in index:
+            json_out[region] = json.dumps(json.loads(data[region].to_json(default_handler=dict)),
+                                          sort_keys=True)
+
+        return json_out
+
+
+class RegionalRequest(Resource):
+    def post(self):
+
+        request.get_json(force=True)
+        args = parser.parse_args()
+
+        datasources_regional_es = COnVIDa.get_data_items_names(DataType.GEOGRAPHICAL, language='ES')
+        datasources_regional_en = COnVIDa.get_data_items_names(DataType.GEOGRAPHICAL, language='EN')
+
+        lang = ''
+        if all(elem in list(datasources_regional_es.values())[0] for elem in args['data']):
+            lang = 'ES'
+        elif all(elem in list(datasources_regional_en.values())[0] for elem in args['data']):
+            lang = 'EN'
+        else:
+            return "data_type error", 400
+
+        data = convida_server.get_data_items(data_items=args['data'],
+                                             regions=args['regions'],
+                                             language=lang)
+
+        index = set(data.columns.get_level_values(0))
+        json_out = {}
+
+        for region in index:
+            json_out[region] = json.dumps(json.loads(data[region].to_json(default_handler=dict)),
+                                          sort_keys=True)
+
+        return json_out
