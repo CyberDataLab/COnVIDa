@@ -6,7 +6,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output, State, ClientsideFunction
 from dash.exceptions import PreventUpdate
 from functools import partial
 
@@ -23,7 +23,7 @@ import uuid
 import sys
 # import uwsgidecorators
 import time
-from urllib.parse import urlparse, parse_qs, urlencode
+from urllib.parse import urlparse, parse_qs
 
 PORT = 8899
 # Developing: DEBUG = True
@@ -916,25 +916,15 @@ def set_language(n_clicks_es, n_clicks_en):
         return 'EN', generate_layout('EN')
     return 'ES', generate_layout('ES')
 
-
-@dash_app.callback(
+dash_app.clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='display'
+    ),
     Output("share_bar", "children"),
     [Input("share_button", "n_clicks")],
     [State("share_temporal", "data")]
 )
-def gen_share_url(share_button, data):
-    if share_button > 0:
-        if data is not None:
-            data.pop('analysis_type')
-            data.pop('language')  # Incompatible with ES-EN parameters.
-            data.pop('selected_plot_scale')  # Default representation in graphs (for now)
-            data.pop('selected_graph_type')  # Default representation in graphs (for now)
-            output = urlencode(data, doseq=True)
-            output = f'http://localhost:8899/?{output}'
-            return html.Div(html.H6(output, style={"font-size": "0.8rem"}),
-                            style={"margin-right": "10px", "margin-top": "13px"})
-    return None
-
 
 def parse_url(url):
     """
