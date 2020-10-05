@@ -85,13 +85,14 @@ class TemporalRequest(Resource):
                                              start_date=start_date,
                                              end_date=end_date, language=lang)
 
+
+        data.index = data.index.astype(str)
         index = set(data.columns.get_level_values(0))
         json_out = {}
 
         for region in index:
             json_out[region] = json.dumps(json.loads(data[region].to_json(default_handler=dict)),
                                           sort_keys=True)
-
         return json_out
 
 
@@ -115,6 +116,7 @@ class RegionalRequest(Resource):
         data = convida_server.get_data_items(data_items=args['data'],
                                              regions=args['regions'],
                                              language=lang)
+
 
         index = set(data.columns.get_level_values(0))
         json_out = {}
