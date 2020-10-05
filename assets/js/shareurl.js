@@ -2,13 +2,12 @@ if(!window.dash_clientside) {window.dash_clientside = {};}
 window.dash_clientside.clientside = {
     display: function (share_button, data) {
         function copyToClipboard(text) {
-            var dummy = document.createElement("textarea");
-            document.body.appendChild(dummy);
-            dummy.value = text;
-            dummy.select();
+            var textarea = document.createElement("textarea");
+            document.body.appendChild(textarea);
+            textarea.value = text;
+            textarea.select();
             document.execCommand("copy");
-            document.body.removeChild(dummy);
-            // alert('URL copied!')
+            document.body.removeChild(textarea);
         }
 
         if (share_button > 0){
