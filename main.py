@@ -909,9 +909,14 @@ dash_app.layout = html.Div(generate_layout('ES'), id="convida_main_container")
 
 @dash_app.callback(
     [Output("LANG", "data"), Output("convida_main_container", "children")],
-    [Input("es-lang", "n_clicks"), Input("en-lang", "n_clicks")],
+    [Input("es-lang", "n_clicks"), Input("en-lang", "n_clicks"), Input('url', 'search')],
 )
-def set_language(n_clicks_es, n_clicks_en):
+def set_language(n_clicks_es, n_clicks_en, search):
+
+    if search:
+        state = parse_url(search)
+        if 'language' in state.keys():
+            return state.get('language', '')[0], generate_layout(state.get('language', '')[0])
     if n_clicks_en == 1:
         return 'EN', generate_layout('EN')
     return 'ES', generate_layout('ES')
@@ -975,7 +980,7 @@ def select_all_regions(n_clicks, search):
         return []
     if search:
         state = parse_url(search)
-        return state.get('selected_regions', '')
+        return state.get('selected_regions', '')[0].split(",")
     else:
         return []
 
@@ -991,7 +996,7 @@ def select_all_data_items(n_clicks, search, dropdown_options, dataSource):
         aux = []
         for i in state.keys():
             if i == 'selected_{}'.format(dataSource.lower()):
-                aux.extend(state[i])
+                aux.extend(state[i][0].split(","))
         return aux
     else:
         return []
