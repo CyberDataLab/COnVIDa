@@ -910,12 +910,14 @@ dash_app.layout = html.Div(generate_layout('ES'), id="convida_main_container")
 @dash_app.callback(
     [Output("LANG", "data"), Output("convida_main_container", "children")],
     [Input("es-lang", "n_clicks"), Input("en-lang", "n_clicks"), Input('url', 'search')],
+    [State("LANG", "data")],
 )
-def set_language(n_clicks_es, n_clicks_en, search):
-
-    if search:
+def set_language(n_clicks_es, n_clicks_en, search, lang):
+    if search and not n_clicks_en and not n_clicks_es:
         state = parse_url(search)
-        if 'language' in state.keys():
+        if 'language' in state.keys() and lang == state['language'][0]:
+            raise PreventUpdate
+        elif 'language' in state.keys():
             return state.get('language', '')[0], generate_layout(state.get('language', '')[0])
     if n_clicks_en == 1:
         return 'EN', generate_layout('EN')
@@ -996,7 +998,9 @@ def select_all_data_items(n_clicks, search, dropdown_options, dataSource):
         aux = []
         for i in state.keys():
             if i == 'selected_{}'.format(dataSource.lower()):
-                aux.extend(state[i][0].split(","))
+                dropdown_option = [dropdown_option.get("label") for dropdown_option in dropdown_options[dataSource]]
+                if all(elem in dropdown_option for elem in state[i][0].split(",")):
+                    aux.extend(state[i][0].split(","))
         return aux
     else:
         return []

@@ -17,9 +17,14 @@ window.dash_clientside.clientside = {
                 delete data['selected_plot_scale']
                 delete data['selected_graph_type']
                 let u = new URLSearchParams(data).toString();
-                output = 'http://localhost:8899/?' + u
+                output = 'https://convida.inf.um.es/?' + u
                 copyToClipboard(output)
-                alert('URL copied to the clipboard')
+                if (data['language'] === 'ES'){
+                    alert('URL copiada al portapapeles')
+                } else {
+                    alert('URL copied to the clipboard')
+                }
+
             }
         }
 
