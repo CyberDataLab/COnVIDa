@@ -915,7 +915,7 @@ dash_app.layout = html.Div(generate_layout('ES'), id="convida_main_container")
 def set_language(n_clicks_es, n_clicks_en, search, lang):
     if search and not n_clicks_en and not n_clicks_es:
         state = parse_url(search)
-        if 'language' in state.keys() and lang == state['language'][0]:
+        if 'language' in state.keys() and lang == state['language'][0] and state['language'][0] == 'ES':
             raise PreventUpdate
         elif 'language' in state.keys():
             return state.get('language', '')[0], generate_layout(state.get('language', '')[0])
