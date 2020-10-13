@@ -999,8 +999,19 @@ def select_all_data_items(n_clicks, search, dropdown_options, dataSource):
         for i in state.keys():
             if i == 'selected_{}'.format(dataSource.lower()):
                 dropdown_option = [dropdown_option.get("label") for dropdown_option in dropdown_options[dataSource]]
-                if all(elem in dropdown_option for elem in state[i][0].split(",")):
-                    aux.extend(state[i][0].split(","))
+                sel_data = state[i][0].split(",")
+                exclude = []
+                '''
+                    Compatibility with data items with "," in the name
+                '''
+                for i,v in enumerate(sel_data):
+                    if v.startswith('000'):
+                        sel_data[i-1] = sel_data[i-1] + ',' + sel_data[i]
+                        exclude.append(i)
+                for index in sorted(exclude, reverse=True):
+                    del sel_data[index]
+                if all(elem in dropdown_option for elem in sel_data):
+                    aux.extend(sel_data)
         return aux
     else:
         return []
