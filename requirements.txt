@@ -12,4 +12,5 @@ h5py==2.10.0
 tables==3.6.1
 pyopenssl==19.1.0
 uwsgidecorators==1.1.0
+rest-agent==1.0.2
 flask-restful==0.3.8

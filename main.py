@@ -121,6 +121,7 @@ dash_app.scripts.append_script({
 
 init_api(app)
 
+
 @app.route('/help')
 def help_en():
     return render_template("help.html")
@@ -923,6 +924,7 @@ def set_language(n_clicks_es, n_clicks_en, search, lang):
         return 'EN', generate_layout('EN')
     return 'ES', generate_layout('ES')
 
+
 dash_app.clientside_callback(
     ClientsideFunction(
         namespace='clientside',
@@ -932,6 +934,7 @@ dash_app.clientside_callback(
     [Input("share_button", "n_clicks")],
     [State("share_temporal", "data")]
 )
+
 
 def parse_url(url):
     """
@@ -1004,9 +1007,9 @@ def select_all_data_items(n_clicks, search, dropdown_options, dataSource):
                 '''
                     Compatibility with data items with "," in the name
                 '''
-                for i,v in enumerate(sel_data):
+                for i, v in enumerate(sel_data):
                     if v.startswith('000'):
-                        sel_data[i-1] = sel_data[i-1] + ',' + sel_data[i]
+                        sel_data[i - 1] = sel_data[i - 1] + ',' + sel_data[i]
                         exclude.append(i)
                 for index in sorted(exclude, reverse=True):
                     del sel_data[index]

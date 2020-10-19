@@ -1,4 +1,6 @@
-if(!window.dash_clientside) {window.dash_clientside = {};}
+if (!window.dash_clientside) {
+    window.dash_clientside = {};
+}
 window.dash_clientside.clientside = {
     display: function (share_button, data) {
         function copyToClipboard(text) {
@@ -10,8 +12,8 @@ window.dash_clientside.clientside = {
             document.body.removeChild(textarea);
         }
 
-        if (share_button > 0){
-            if (data !== null){
+        if (share_button > 0) {
+            if (data !== null) {
                 delete data['analysis_type']
                 // delete data['language']
                 delete data['selected_plot_scale']
@@ -19,7 +21,7 @@ window.dash_clientside.clientside = {
                 let u = new URLSearchParams(data).toString();
                 output = 'https://convida.inf.um.es/?' + u
                 copyToClipboard(output)
-                if (data['language'] === 'ES'){
+                if (data['language'] === 'ES') {
                     alert('URL copiada al portapapeles')
                 } else {
                     alert('URL copied to the clipboard')

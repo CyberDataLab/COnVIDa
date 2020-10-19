@@ -48,7 +48,6 @@ parser.add_argument('end_date', type=str)
 
 class DefaultRequest(Resource):
     def post(self):
-
         return 'Usage -> http://localhost:8899/api/[temporal|regional]', 400
 
 
@@ -85,7 +84,6 @@ class TemporalRequest(Resource):
                                              start_date=start_date,
                                              end_date=end_date, language=lang)
 
-
         data.index = data.index.astype(str)
         index = set(data.columns.get_level_values(0))
         json_out = {}
@@ -116,7 +114,6 @@ class RegionalRequest(Resource):
         data = convida_server.get_data_items(data_items=args['data'],
                                              regions=args['regions'],
                                              language=lang)
-
 
         index = set(data.columns.get_level_values(0))
         json_out = {}
