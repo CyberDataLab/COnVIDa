@@ -99,13 +99,25 @@ body {
 }
 
 .DateInput {
-    width: 105px;
+    width: 97px;
 }
 
 .data-retrieval-settings-container {
-    padding: 0px 0px 10px 20px;
-    margin: 0px 1px 10px 1px;
+    padding: 0px 0px 0px 20px;
     border-width: 1.5px;
+}
+
+#select_spain {
+    margin-left: 10px;
+    margin-top: 5px;
+}
+
+.data-retrieval-settings-spain {
+    display: flex;
+}
+
+#further-data-sources {
+    margin-top: 10px;
 }
 
 .select-all-button {

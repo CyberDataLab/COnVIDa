@@ -136,7 +136,11 @@ def help_es():
 # to be used as the options for the dropdown of Regions
 regions_options = [
     {"label": str(region), "value": str(region)}
-    for region in Regions.get_regions('ES')
+    for region in Regions.get_regions_by_type('r', 'ES')
+]
+province_options = [
+    {"label": str(region), "value": str(region)}
+    for region in Regions.get_regions_by_type('p', 'ES')
 ]
 
 # Default layout for an empty graph
@@ -147,7 +151,7 @@ empty_graph_layout = dict(
     hovermode="closest",
     plot_bgcolor="#F9F9F9",
     paper_bgcolor="#F9F9F9",
-    legend=dict(font=dict(size=10), orientation="h"),
+    legend=dict(font=dict(size=10), orientation="h", y=-0.4),
     yaxis=dict(
         type='linear'
     ),
@@ -374,14 +378,43 @@ def generate_data_retrieval_settings_panel(dropdown_options, language):
                 html.Div(
                     [
                         html.H6(convida_dict.get('regions_label').get(language), className="control_label"),
+                        html.Div(
+                            [
+                                html.Button(convida_dict.get('select_all_label').get(language),
+                                            id="select_all_regions_button",
+                                            n_clicks=0,
+                                            className="select-all-button",
+                                            ),
+                                dcc.Checklist(
+                                    options=[
+                                        {'label': convida_dict.get('select_spain').get(language), 'value': 'España'},
+                                    ],
+                                    id="select_spain",
+                                )
+                            ],
+                            className='data-retrieval-settings-spain'
+                        ),
+                        dcc.Dropdown(
+                            id="selected_regions",
+                            options=regions_options,
+                            multi=True,
+                            className="dcc_control",
+                            placeholder=convida_dict.get('select_label').get(language)
+                        ),
+                    ],
+                    className="data-retrieval-settings-container three columns",
+                ),
+                html.Div(
+                    [
+                        html.H6(convida_dict.get('provinces_label').get(language), className="control_label"),
                         html.Button(convida_dict.get('select_all_label').get(language),
-                                    id="select_all_regions_button",
+                                    id="select_all_provinces_button",
                                     n_clicks=0,
                                     className="select-all-button",
                                     ),
                         dcc.Dropdown(
-                            id="selected_regions",
-                            options=regions_options,
+                            id="selected_provinces",
+                            options=province_options,
                             multi=True,
                             className="dcc_control",
                             placeholder=convida_dict.get('select_label').get(language)
@@ -413,8 +446,6 @@ def generate_data_retrieval_settings_panel(dropdown_options, language):
                 ),
                 html.Div(
                     [
-                        html.H6(convida_dict.get('further_data_sources_label').get(language),
-                                className="control_label"),
                         dcc.Checklist(
                             options=[
                                 {'label': 'INE', 'value': 'ine'},
@@ -425,7 +456,7 @@ def generate_data_retrieval_settings_panel(dropdown_options, language):
                             id="further-data-sources",
                         ),
                     ],
-                    className='data-retrieval-settings-container three columns',
+                    className='data-retrieval-settings-container one columns',
                 ),
             ],
             ),
@@ -953,12 +984,13 @@ def parse_url(url):
 
 
 @dash_app.callback([Output("date-picker-range", "start_date"), Output("date-picker-range", "end_date"),
-                    Output('further-data-sources', 'value')],
+                    Output('further-data-sources', 'value'), Output('select_spain', 'value')],
                    [Input('url', 'search')])
 def share_url(search):
     if search:
         state = parse_url(search)
         aux = []
+        spain_box = []
         for i in state.keys():
             if 'ine' in i:
                 aux.append('ine')
@@ -968,9 +1000,11 @@ def share_url(search):
                 aux.append('momo')
             elif 'aemet' in i:
                 aux.append('aemet')
-        return state.get('start_date', '')[0], state.get('end_date', '')[0], aux
+            elif 'select_spain' in i:
+                spain_box.append(state[i][0])
+        return state.get('start_date', '')[0], state.get('end_date', '')[0], aux, spain_box
     else:
-        return str(dt(2020, 2, 21))[0:10], convida_server.get_max_date(), []
+        return str(dt(2020, 2, 21))[0:10], convida_server.get_max_date(), [], []
 
 
 @dash_app.callback(
@@ -985,7 +1019,30 @@ def select_all_regions(n_clicks, search):
         return []
     if search:
         state = parse_url(search)
-        return state.get('selected_regions', '')[0].split(",")
+        if 'selected_regions' in state:
+            return state.get('selected_regions', '')[0].split(",")
+        else:
+            return []
+    else:
+        return []
+
+
+@dash_app.callback(
+    Output("selected_provinces", "value"),
+    [Input("select_all_provinces_button", "n_clicks"), Input('url', 'search')],
+)
+def select_all_regions(n_clicks, search):
+    input_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+    if input_id == 'select_all_provinces_button':
+        if n_clicks > 0:
+            return [dropdown_option.get("label") for dropdown_option in province_options]
+        return []
+    if search:
+        state = parse_url(search)
+        if 'selected_provinces' in state:
+            return state.get('selected_provinces', '')[0].split(",")
+        else:
+            return []
     else:
         return []
 
@@ -1078,8 +1135,15 @@ def toggle_further_data_sources(selected_further_data_sources, search):
     return output
 
 
+def regions_form(regions):
+    selected_regions_form = []
+    for r in regions:
+        selected_regions_form.append("CA " + r)
+    return selected_regions_form
+
+
 def update_graph_and_table(start_date, end_date,
-                           selected_regions, selected_covid19,
+                           selected_regions, selected_provinces, select_spain, selected_covid19,
                            selected_ine, selected_mobility,
                            selected_momo, selected_aemet,
                            selected_graph_type,
@@ -1134,15 +1198,14 @@ def update_graph_and_table(start_date, end_date,
     """
     # print(f'{start_date} {end_date} {selected_regions} {selected_covid19} {language}')
     params = locals()
-
     layout_graph = copy.deepcopy(empty_graph_layout)
     selected_temporal_data_items = selected_covid19 + selected_mobility + selected_momo + selected_aemet
     selected_data_items = selected_temporal_data_items + selected_ine
     # No data to plot
-    if ((len(selected_regions) == 0) or (len(selected_data_items) == 0) or
+    if ((len(selected_regions) == 0) and (len(selected_provinces) == 0) and (not select_spain) or (
+            len(selected_data_items) == 0) or
             ((len(selected_temporal_data_items) == 0) and (analysis_type == 'temporal'))):
-
-        if len(selected_regions) == 0:
+        if len(selected_regions) == 0 and len(selected_provinces) == 0 and not select_spain:
             empty_graph_annotation['text'] = convida_dict.get('no_regions_selected_label').get(language)
         elif len(selected_data_items) == 0:
             empty_graph_annotation['text'] = convida_dict.get('no_data_selected_label').get(language)
@@ -1162,7 +1225,13 @@ def update_graph_and_table(start_date, end_date,
     layout_graph["yaxis"]["type"] = 'linear' if selected_plot_scale == 'Linear' else 'log'
     graph_type = "scatter" if selected_graph_type == 'lines' else "bar"
     logging = True if analysis_type == 'temporal' else False  # To avoid double logging
-    dfQuery = query_data(start_date, end_date, selected_regions,
+
+    if select_spain:
+        selected_regions_provinces = regions_form(list(selected_regions)) + list(selected_provinces) + select_spain
+    else:
+        selected_regions_provinces = regions_form(list(selected_regions)) + list(selected_provinces)
+
+    dfQuery = query_data(start_date, end_date, selected_regions_provinces,
                          selected_temporal_data_items,
                          selected_ine,
                          analysis_type, language, logging)
@@ -1180,11 +1249,24 @@ def update_graph_and_table(start_date, end_date,
                 marker=dict(symbol="diamond-open"),
             ),
         )
+    print("!")
+    as_list = dfQuery.index.tolist()
+    print(as_list)
+    try:
+        for i, val in enumerate(as_list):
+            if 'CA' in val:
+                as_list[i] = as_list[i].replace('CA ', '')
+    except:
+        pass
+    data[0]['x'] = as_list
+
+    for i in range(len(list(dfQuery.columns.values))):
+        data[i]['name'] = data[i]['name'].replace('CA ', '')
     graph = dict(data=data, layout=copy.deepcopy(layout_graph))
     table = get_summary_table(dfQuery)
 
     output = [params, graph, table, {"display": "block"},
-              [start_date, end_date, selected_regions,
+              [start_date, end_date, selected_regions_provinces,
                selected_temporal_data_items, selected_ine]]
     return output
 
@@ -1202,6 +1284,8 @@ for analysis_type in ('temporal', 'regional'):
             Input('date-picker-range', 'start_date'),
             Input('date-picker-range', 'end_date'),
             Input("selected_regions", "value"),
+            Input("selected_provinces", "value"),
+            Input("select_spain", "value"),
             Input("selected_covid19", "value"),
             Input("selected_ine", "value"),
             Input("selected_mobility", "value"),
@@ -1251,7 +1335,6 @@ def query_data(start_date, end_date, selected_regions,
     """
     start = pd.to_datetime(start_date)
     end = pd.to_datetime(end_date)
-
     dfTemp = pd.DataFrame()
     if len(selected_temporal_data_items) > 0:
         dfTemp = convida_server.get_data_items(data_items=selected_temporal_data_items,
@@ -1317,10 +1400,15 @@ def get_summary_table(dfQuery) -> dash_table.DataTable:
     summary_table = summary_table.reset_index()
     summary_table = summary_table.rename(columns={'index': ''})
 
+    edit_sum = summary_table.to_dict('records')
+    for i, val in enumerate(edit_sum):
+        if "Region" in edit_sum[i].keys():
+            edit_sum[i]['Region'] = edit_sum[i]['Region'].replace("CA ", "")
+
     summary_data_table = dash_table.DataTable(
         id='summary_table',
         columns=[{"name": col, "id": col} for col in summary_table.columns],
-        data=summary_table.to_dict('records'),
+        data=edit_sum,
         style_cell_conditional=[
             {
                 'if': {'column_id': cell},
@@ -1351,6 +1439,7 @@ def get_summary_table(dfQuery) -> dash_table.DataTable:
         sort_action='native',
         page_size=10,
     )
+
     return summary_data_table
 
 

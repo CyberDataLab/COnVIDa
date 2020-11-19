@@ -31,9 +31,17 @@
     "ES": "Selecciona...",
     "EN": "Select..."
   },
+  "select_spain": {
+    "ES": "Añadir España",
+    "EN": "Add Spain"
+  },
   "regions_label": {
     "ES": "Regiones",
     "EN": "Regions"
+  },
+  "provinces_label": {
+    "ES": "Provincias",
+    "EN": "Provinces"
   },
   "covid19_data_label": {
     "ES": "Datos de COVID19",
@@ -127,7 +135,6 @@
     "ES": "No se han seleccionado regiones",
     "EN": "No regions selected"
   },
-
   "no_data_selected_label": {
     "ES": "No se han seleccionado datos",
     "EN": "No data selected"

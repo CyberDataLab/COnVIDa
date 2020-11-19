@@ -73,8 +73,9 @@
   .two.columns {
     width: 13.3333333333%;
   }
+  /* 24.8% default */
   .three.columns {
-    width: 24.8%;
+    width: 21.8%;
   }
   .four.columns {
     width: 30.6666666667%;
@@ -550,15 +551,17 @@ there.
 
 /* Larger than phablet (also point when grid becomes active), screen larger than 550px */
 @media (min-width: 1000px) {
+  /* 8% default */
   .one.column,
   .one.columns {
-    width: 8%;
+    width: 12%;
   }
   .two.columns {
     width: 16.25%;
   }
+  /* 24.8% default */
   .three.columns {
-    width: 24.8%;
+    width: 21.8%;
   }
   .four.columns {
     width: calc(100% / 3);
