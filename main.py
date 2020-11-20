@@ -151,7 +151,7 @@ empty_graph_layout = dict(
     hovermode="closest",
     plot_bgcolor="#F9F9F9",
     paper_bgcolor="#F9F9F9",
-    legend=dict(font=dict(size=10), orientation="h", y=-0.4),
+    legend=dict(font=dict(size=10), orientation="h", y=-0.2),
     yaxis=dict(
         type='linear'
     ),
@@ -650,6 +650,9 @@ def generate_graph_container(language, graph_type):
                         },
                         figure={
                             "layout": empty_graph_layout,
+                        },
+                        style={
+                            'height': 800
                         },
                     )
                 ],
@@ -1235,7 +1238,6 @@ def update_graph_and_table(start_date, end_date,
                          selected_temporal_data_items,
                          selected_ine,
                          analysis_type, language, logging)
-
     data = []
     for column in list(dfQuery.columns.values):
         data.append(
@@ -1249,19 +1251,33 @@ def update_graph_and_table(start_date, end_date,
                 marker=dict(symbol="diamond-open"),
             ),
         )
-    print("!")
-    as_list = dfQuery.index.tolist()
-    print(as_list)
-    try:
-        for i, val in enumerate(as_list):
-            if 'CA' in val:
-                as_list[i] = as_list[i].replace('CA ', '')
-    except:
-        pass
-    data[0]['x'] = as_list
 
-    for i in range(len(list(dfQuery.columns.values))):
-        data[i]['name'] = data[i]['name'].replace('CA ', '')
+    # Check empty data
+    if not dfQuery.empty:
+        as_list = dfQuery.index.tolist()
+        try:
+            for i, val in enumerate(as_list):
+
+                if 'CA' in val:
+                    as_list[i] = as_list[i].replace('CA ', '')
+        except:
+            pass
+
+        for i, val in enumerate(data):
+            data[i]['x'] = as_list
+
+        for i in range(len(list(dfQuery.columns.values))):
+            data[i]['name'] = data[i]['name'].replace('CA ', '')
+
+    else:
+        layout_graph = copy.deepcopy(empty_graph_layout)
+        empty_graph_annotation['text'] = convida_dict.get('no_available_data_label').get(language)
+        layout_graph["annotations"] = [empty_graph_annotation]
+        figure = dict(data=[], layout=layout_graph)
+        output = [params, figure, [], {"display": "none"}, []]
+
+        return output
+
     graph = dict(data=data, layout=copy.deepcopy(layout_graph))
     table = get_summary_table(dfQuery)
 

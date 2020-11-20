@@ -143,6 +143,10 @@
     "ES": "No se han seleccionado datos temporales",
     "EN": "No temporal data selected"
   },
+  "no_available_data_label": {
+    "ES": "No existe información para los datos seleccionados",
+    "EN": "No information available for the selected data"
+  },
   "graph_type_label": {
     "ES": "Tipo de gráfica",
     "EN": "Graph type"
