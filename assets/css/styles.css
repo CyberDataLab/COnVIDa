@@ -61,6 +61,11 @@ body {
     font-weight: bold;
 }
 
+.eye-icon {
+    height: 15px;
+    margin-left: 10px;
+}
+
 .rc-slider {
     margin-left: 0px;
     padding-left: 0px;
@@ -255,6 +260,10 @@ body {
 }
 
 .dash-table-container .dash-spreadsheet-container .dash-spreadsheet-inner td.focused {
+}
+
+.dash-dropdown {
+    line-height: 1;
 }
 
 #button_show_more {

@@ -24,6 +24,9 @@ import sys
 # import uwsgidecorators
 import time
 from urllib.parse import urlparse, parse_qs
+import plotly.express as px
+
+# sys.stderr = open('err.txt', 'w')
 
 PORT = 8899
 # Developing: DEBUG = True
@@ -138,10 +141,26 @@ regions_options = [
     {"label": str(region), "value": str(region)}
     for region in Regions.get_regions_by_type('r', 'ES')
 ]
+
+regions_map_names = [i['value'] for i in regions_options]
+with open(PATH + '/assets/maps/spain-communities.json', encoding='utf8') as json_file:
+    region_map = json.load(json_file)
+
+df_region = pd.DataFrame(regions_map_names, columns=['name'])
+df_region['name_length'] = df_region['name'].str.len()
+
 province_options = [
     {"label": str(region), "value": str(region)}
     for region in Regions.get_regions_by_type('p', 'ES')
 ]
+prov_map_names = [i['value'] for i in province_options]
+with open(PATH + '/assets/maps/spain-provinces.json', encoding='utf8') as json_file:
+    province_map = json.load(json_file)
+
+df_prov = pd.DataFrame(prov_map_names, columns=['name'])
+df_prov['name_length'] = 0
+
+df_prov['name'] = df_prov['name'].replace({'Santa Cruz de Tenerife': "Tenerife"})
 
 # Default layout for an empty graph
 empty_graph_layout = dict(
@@ -664,6 +683,11 @@ def generate_graph_container(language, graph_type):
     )
 
 
+df = px.data.election()
+geojson = px.data.election_geojson()
+candidates = df.winner.unique()
+
+
 def generate_graph_settings_container(language, graph_type):
     """Creates and returns the HTML code for the graph settings
     container of the dashboard.
@@ -705,7 +729,7 @@ def generate_graph_settings_container(language, graph_type):
                         searchable=False
                     ),
                 ],
-                style={"width": "100%"},
+                style={"width": "100%"} if graph_type == "temporal" else {'display': 'none'},
             ),
             html.Div(
                 [
@@ -866,16 +890,214 @@ def generate_graph_and_table_containers(language, graph_type):
 
     return html.Div(
         [
-            html.H6(
+            html.H6([
                 convida_dict.get("{}_visualization_label".format(graph_type)).get(language),
+
+                html.Img(src=dash_app.get_asset_url("img/eye-dis.svg"),
+                         className="eye-icon"),
+            ],
                 className="control_label",
                 style={"padding-bottom": "5px",
                        "font-size": "1.8rem"},
             ),
+
             generate_graph_container(language, graph_type),
             generate_graph_settings_container(language, graph_type),
             generate_table_container(language, graph_type),
         ],
+    )
+
+
+def regions_form(regions):
+    selected_regions_form = []
+    for r in regions:
+        selected_regions_form.append("CA " + r)
+    return selected_regions_form
+
+
+def regions_form_des(regions):
+    selected_regions_form = []
+    for r in regions:
+        selected_regions_form.append(r.replace('CA ', ''))
+    return selected_regions_form
+
+
+@dash_app.callback(
+    [Output("map", "figure")],
+    [Input("region_type", "value"),
+     Input("dataitems_map", "value"),
+     Input('date-picker-range', 'start_date'),
+     Input('date-picker-range', 'end_date')],
+    [
+        State("LANG", "data"),
+    ])
+def display_choropleth(region_type, dataitems_map, start_date, end_date, language):
+    if region_type == "region" and dataitems_map is not None:
+
+        regions = [dropdown_option.get("label") for dropdown_option in regions_options]
+        regions_f = regions_form(list(regions))
+
+        # Easy implementation
+        if "*" not in dataitems_map:
+
+            dfQuery = query_data(start_date, end_date, regions_f,
+                                 [dataitems_map],
+                                 [dataitems_map],
+                                 'temporal', language)
+            print("START HERE")
+            print(dfQuery)
+
+            summary_table = dfQuery.describe()
+            summary_table = summary_table.round(2)
+            summary_table = summary_table.transpose()
+            summary_table = summary_table.reset_index()
+            summary_table = summary_table.rename(columns={'index': ''})
+            print(summary_table)
+            summary_table['Region'] = summary_table['Region'].apply(lambda x: x.replace("CA ", ""))
+
+            print(summary_table)
+            print(summary_table[['Region', 'mean']])
+
+            fig = px.choropleth_mapbox(summary_table, geojson=region_map, locations='Region', color='mean',
+                                       mapbox_style="carto-positron", featureidkey="properties.name",
+                                       color_continuous_scale="ylorrd",
+                                       zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                       opacity=0.5,
+                                       )
+            fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+            return [fig]
+
+
+        else:
+
+            # Con dfGeo ya devuelve el valor para cada Region
+            # Region                                                        ...
+            # CA Andalucía                                          1207.9  ...                           0.0
+            # CA Aragón                                               98.7  ...                           1.1
+            dfGeo = convida_server.get_data_items(data_items=[dataitems_map[:-1]],
+                                                  regions=regions_f, language=language)
+            print("START HERE")
+            print(dfGeo.columns)
+            print(dfGeo.index)
+            dfGeo.reset_index(level=0, inplace=True)
+            print(dfGeo)
+            dfGeo['Region'] = dfGeo['Region'].apply(lambda x: x.replace("CA ", ""))
+            fig = px.choropleth_mapbox(dfGeo, geojson=region_map, locations='Region', color=dfGeo.columns.tolist()[1],
+                                       mapbox_style="carto-positron", featureidkey="properties.name",
+                                       color_continuous_scale="ylorrd",
+                                       zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                       opacity=0.5,
+                                       )
+            fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+            return [fig]
+
+    elif region_type == "prov" and dataitems_map is not None:
+
+        provs = [dropdown_option.get("label") for dropdown_option in province_options]
+        print(provs)
+
+        # Easy implementation
+        if "*" not in dataitems_map:
+            dfQuery = query_data(start_date, end_date, provs,
+                                 [dataitems_map],
+                                 [dataitems_map],
+                                 'temporal', language)
+            print("START HERE")
+            print(dfQuery)
+
+            summary_table = dfQuery.describe()
+            summary_table = summary_table.round(2)
+            summary_table = summary_table.transpose()
+            summary_table = summary_table.reset_index()
+            summary_table = summary_table.rename(columns={'index': ''})
+            print(summary_table)
+            summary_table['Region'] = summary_table['Region'].apply(lambda x: x.replace("CA ", ""))
+
+            print(summary_table)
+            print(summary_table[['Region', 'mean']])
+
+            fig = px.choropleth_mapbox(summary_table, geojson=province_map, locations='Region', color='mean',
+                                       mapbox_style="carto-positron", featureidkey="properties.name",
+                                       color_continuous_scale="ylorrd",
+                                       zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                       opacity=0.5,
+                                       )
+            fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+            return [fig]
+
+        else:
+
+            # Region                                                        ...
+            # CA Andalucía                                          1207.9  ...                           0.0
+            # CA Aragón                                               98.7  ...                           1.1
+            dfGeo = convida_server.get_data_items(data_items=[dataitems_map[:-1]],
+                                                  regions=provs, language=language)
+            print("START HERE")
+            print(dfGeo.columns)
+            print(dfGeo.index)
+            dfGeo.reset_index(level=0, inplace=True)
+            print(dfGeo)
+            dfGeo['Region'] = dfGeo['Region'].apply(lambda x: x.replace("CA ", ""))
+
+            fig = px.choropleth_mapbox(dfGeo, geojson=province_map, locations='Region', color=dfGeo.columns.tolist()[1],
+                                       mapbox_style="carto-positron", featureidkey="properties.name",
+                                       color_continuous_scale="ylorrd",
+                                       zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                       opacity=0.5,
+                                       )
+            fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+            return [fig]
+
+    # empty map
+    else:
+        fig = px.choropleth_mapbox(df_region, geojson=region_map, locations='name', color='name_length',
+                                   mapbox_style="carto-positron",
+                                   zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                   opacity=0.5,
+                                   )
+        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+        return [fig]
+
+
+@dash_app.callback(
+    Output("dataitems_map", "options"),
+    [Input("selected_covid19", "value"),
+     Input("selected_ine", "value"),
+     Input("selected_mobility", "value"),
+     Input("selected_momo", "value"),
+     Input("selected_aemet", "value")])
+def update_dropdown_map(selected_covid19, selected_ine, selected_mobility, selected_momo, selected_aemet):
+    ine_mod = [i + '*' for i in selected_ine]
+    selected_dataitems = selected_covid19 + ine_mod + selected_mobility + selected_momo + selected_aemet
+    return [{"label": str(di), "value": str(di)} for di in selected_dataitems]
+
+
+def generate_test_map():
+    return html.Div(
+        [
+            dcc.RadioItems(
+                id='region_type',
+                value="region",
+                options=[
+                    {'value': "region", 'label': "Regiones"},
+                    {'value': "prov", 'label': "Provincias"}
+                ],
+                labelStyle={'display': 'inline-block'}
+            ),
+            dcc.Dropdown(
+                id="dataitems_map",
+                multi=False,
+                className="dcc_control",
+                placeholder="place"
+            ),
+            dcc.Graph(
+                id="map",
+                style={
+                    'height': 800,
+                },
+            ),
+        ],
+        className="pretty_container"
     )
 
 
@@ -924,6 +1146,8 @@ def generate_layout(language):
 
             generate_graph_and_table_containers(language, "temporal"),
             generate_graph_and_table_containers(language, "regional"),
+
+            generate_test_map(),
 
             html.Footer(
                 [
@@ -1138,13 +1362,6 @@ def toggle_further_data_sources(selected_further_data_sources, search):
     return output
 
 
-def regions_form(regions):
-    selected_regions_form = []
-    for r in regions:
-        selected_regions_form.append("CA " + r)
-    return selected_regions_form
-
-
 def update_graph_and_table(start_date, end_date,
                            selected_regions, selected_provinces, select_spain, selected_covid19,
                            selected_ine, selected_mobility,
@@ -1226,7 +1443,10 @@ def update_graph_and_table(start_date, end_date,
     layout_graph["autosize"] = True
 
     layout_graph["yaxis"]["type"] = 'linear' if selected_plot_scale == 'Linear' else 'log'
-    graph_type = "scatter" if selected_graph_type == 'lines' else "bar"
+    if analysis_type == "regional":
+        graph_type = "bar"
+    else:
+        graph_type = "scatter" if selected_graph_type == 'lines' else "bar"
     logging = True if analysis_type == 'temporal' else False  # To avoid double logging
 
     if select_spain:
