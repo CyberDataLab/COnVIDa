@@ -683,6 +683,62 @@ def generate_graph_container(language, graph_type):
     )
 
 
+def generate_graph_container_with_map(language, graph_type):
+    """Creates and returns the HTML code for the graph container
+    of the dashboard.
+
+    Parameters
+    ----------
+    language : str
+        The language to be used (e.g., 'ES' or 'EN')
+    graph_type : str
+        The type of graph to be generated (e.g., 'temporal' or 'regional')
+
+    Returns
+    -------
+    html
+        HTML code for the graph container of the dashboard
+        including the loading wheel functionality
+    """
+
+    return html.Div(
+        [
+            dcc.Loading(
+                [
+                    html.Div([
+                        dcc.Graph(
+                            id="{}_graph".format(graph_type),
+                            config={
+                                "locale": "es" if language == 'ES' else "en-US",
+                                "displaylogo": False,
+                            },
+                            figure={
+                                "layout": empty_graph_layout,
+                            },
+                            style={
+                                'height': 800,
+                                'width': '50%',
+                            },
+                        ),
+                        dcc.Graph(
+                            id="map",
+                            style={
+                                'height': 800,
+                                'width': '50%',
+                            },
+                        ),
+                    ],
+                        style={"display": "flex"},
+                    )
+                ],
+                type="circle",
+            ),
+        ],
+        id="{}-graph-container".format(graph_type),
+        className="pretty_container",
+    )
+
+
 df = px.data.election()
 geojson = px.data.election_geojson()
 candidates = df.winner.unique()
@@ -753,6 +809,102 @@ def generate_graph_settings_container(language, graph_type):
         ],
         id="graph-settings-container-{}".format(graph_type),
         className="pretty_container",
+        style={"display": "flex"},
+    )
+
+
+def generate_graph_settings_container_with_map(language, graph_type):
+    """Creates and returns the HTML code for the graph settings
+    container of the dashboard.
+
+    Parameters
+    ----------
+    language : str
+        The language to be used (e.g., 'ES' or 'EN')
+    graph_type : str
+        The type of graph whose settings are to be generated
+        (e.g., 'temporal' or 'regional')
+
+    Returns
+    -------
+    html
+        HTML code for the graph settings container of the dashboard
+        including the type of graph (lines or bars) and the plot
+        scale (linear or logarithmic).
+    """
+
+    return html.Div([
+        html.Div(
+            [
+                html.Div(
+                    [
+                        html.H6(convida_dict.get('graph_type_label').get(language),
+                                className="control_label"),
+                        dcc.Dropdown(
+                            id="{}_selected_graph_type".format(graph_type),
+                            options=[
+                                {"label": convida_dict.get('lines_graph_type_label').get(language),
+                                 "value": "lines"},
+                                {"label": convida_dict.get('bars_graph_type_label').get(language),
+                                 "value": "bars"},
+                            ],
+                            multi=False,
+                            value='lines',
+                            clearable=False,
+                            className="dcc_control",
+                            searchable=False
+                        ),
+                    ],
+                    style={"width": "100%"} if graph_type == "temporal" else {'display': 'none'},
+                ),
+                html.Div(
+                    [
+                        html.H6(convida_dict.get('plot_scale_label').get(language),
+                                className="control_label"),
+                        dcc.RadioItems(
+                            id="{}_selected_plot_scale".format(graph_type),
+                            value="Linear",
+                            options=[
+                                {"label": convida_dict.get('plot_scale_linear_label').get(language),
+                                 "value": "Linear"},
+                                {"label": convida_dict.get('plot_scale_log_label').get(language),
+                                 "value": "Log"},
+                            ],
+                            labelStyle={"display": "inline-block"},
+                            className="dcc_control",
+                        ),
+                    ],
+                    style={"width": "100%"},
+                ),
+            ],
+            id="graph-settings-container-{}-left".format(graph_type),
+            className="pretty_container_regional",
+            style={"display": "flex"},
+        ),
+        html.Div(
+            [
+                dcc.RadioItems(
+                    id='region_type',
+                    value="region",
+                    options=[
+                        {'value': "region", 'label': "Regiones"},
+                        {'value': "prov", 'label': "Provincias"}
+                    ],
+                    labelStyle={'display': 'inline-block'}
+                ),
+                dcc.Dropdown(
+                    id="dataitems_map",
+                    multi=False,
+                    className="dcc_control",
+                    placeholder="Dataitems seleccionados"
+                ),
+            ],
+            id="graph-settings-container-{}-right".format(graph_type),
+            className="pretty_container_regional",
+        ),
+
+    ],
+        id="graph-settings-container-{}".format(graph_type),
         style={"display": "flex"},
     )
 
@@ -893,16 +1045,21 @@ def generate_graph_and_table_containers(language, graph_type):
             html.H6([
                 convida_dict.get("{}_visualization_label".format(graph_type)).get(language),
 
-                html.Img(src=dash_app.get_asset_url("img/eye-dis.svg"),
-                         className="eye-icon"),
+                html.Img(src=dash_app.get_asset_url("img/eye-ena.svg"),
+                         className="eye-icon",
+                         id="{}-eye-icon".format(graph_type)),
             ],
                 className="control_label",
                 style={"padding-bottom": "5px",
                        "font-size": "1.8rem"},
             ),
 
-            generate_graph_container(language, graph_type),
-            generate_graph_settings_container(language, graph_type),
+            generate_graph_container(language,
+                                     graph_type) if graph_type == "temporal" else generate_graph_container_with_map(
+                language, graph_type),
+            generate_graph_settings_container(language,
+                                              graph_type) if graph_type == "temporal" else generate_graph_settings_container_with_map(
+                language, graph_type),
             generate_table_container(language, graph_type),
         ],
     )
@@ -944,27 +1101,24 @@ def display_choropleth(region_type, dataitems_map, start_date, end_date, languag
                                  [dataitems_map],
                                  [dataitems_map],
                                  'temporal', language)
-            print("START HERE")
-            print(dfQuery)
 
             summary_table = dfQuery.describe()
             summary_table = summary_table.round(2)
             summary_table = summary_table.transpose()
             summary_table = summary_table.reset_index()
             summary_table = summary_table.rename(columns={'index': ''})
-            print(summary_table)
             summary_table['Region'] = summary_table['Region'].apply(lambda x: x.replace("CA ", ""))
 
-            print(summary_table)
-            print(summary_table[['Region', 'mean']])
+            summary_table.rename(columns={'mean': dataitems_map}, inplace=True)
 
-            fig = px.choropleth_mapbox(summary_table, geojson=region_map, locations='Region', color='mean',
+            fig = px.choropleth_mapbox(summary_table, geojson=region_map, locations='Region', color=dataitems_map,
                                        mapbox_style="carto-positron", featureidkey="properties.name",
                                        color_continuous_scale="ylorrd",
                                        zoom=4, center={"lat": 40.463667, "lon": -3.74922},
                                        opacity=0.5,
                                        )
             fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+            fig.update_coloraxes(colorbar_title_text="")
             return [fig]
 
 
@@ -976,11 +1130,7 @@ def display_choropleth(region_type, dataitems_map, start_date, end_date, languag
             # CA Aragón                                               98.7  ...                           1.1
             dfGeo = convida_server.get_data_items(data_items=[dataitems_map[:-1]],
                                                   regions=regions_f, language=language)
-            print("START HERE")
-            print(dfGeo.columns)
-            print(dfGeo.index)
             dfGeo.reset_index(level=0, inplace=True)
-            print(dfGeo)
             dfGeo['Region'] = dfGeo['Region'].apply(lambda x: x.replace("CA ", ""))
             fig = px.choropleth_mapbox(dfGeo, geojson=region_map, locations='Region', color=dfGeo.columns.tolist()[1],
                                        mapbox_style="carto-positron", featureidkey="properties.name",
@@ -989,12 +1139,12 @@ def display_choropleth(region_type, dataitems_map, start_date, end_date, languag
                                        opacity=0.5,
                                        )
             fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+            fig.update_coloraxes(colorbar_title_text="")
             return [fig]
 
     elif region_type == "prov" and dataitems_map is not None:
 
         provs = [dropdown_option.get("label") for dropdown_option in province_options]
-        print(provs)
 
         # Easy implementation
         if "*" not in dataitems_map:
@@ -1002,27 +1152,24 @@ def display_choropleth(region_type, dataitems_map, start_date, end_date, languag
                                  [dataitems_map],
                                  [dataitems_map],
                                  'temporal', language)
-            print("START HERE")
-            print(dfQuery)
 
             summary_table = dfQuery.describe()
             summary_table = summary_table.round(2)
             summary_table = summary_table.transpose()
             summary_table = summary_table.reset_index()
             summary_table = summary_table.rename(columns={'index': ''})
-            print(summary_table)
             summary_table['Region'] = summary_table['Region'].apply(lambda x: x.replace("CA ", ""))
 
-            print(summary_table)
-            print(summary_table[['Region', 'mean']])
+            summary_table.rename(columns={'mean': dataitems_map}, inplace=True)
 
-            fig = px.choropleth_mapbox(summary_table, geojson=province_map, locations='Region', color='mean',
+            fig = px.choropleth_mapbox(summary_table, geojson=province_map, locations='Region', color=dataitems_map,
                                        mapbox_style="carto-positron", featureidkey="properties.name",
                                        color_continuous_scale="ylorrd",
                                        zoom=4, center={"lat": 40.463667, "lon": -3.74922},
                                        opacity=0.5,
                                        )
             fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+            fig.update_coloraxes(colorbar_title_text="")
             return [fig]
 
         else:
@@ -1043,6 +1190,7 @@ def display_choropleth(region_type, dataitems_map, start_date, end_date, languag
                                        opacity=0.5,
                                        )
             fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+            fig.update_coloraxes(colorbar_title_text="")
             return [fig]
 
     # empty map
@@ -1053,6 +1201,7 @@ def display_choropleth(region_type, dataitems_map, start_date, end_date, languag
                                    opacity=0.5,
                                    )
         fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+        fig.update_coloraxes(colorbar_title_text="")
         return [fig]
 
 
@@ -1069,33 +1218,33 @@ def update_dropdown_map(selected_covid19, selected_ine, selected_mobility, selec
     return [{"label": str(di), "value": str(di)} for di in selected_dataitems]
 
 
-def generate_test_map():
-    return html.Div(
-        [
-            dcc.RadioItems(
-                id='region_type',
-                value="region",
-                options=[
-                    {'value': "region", 'label': "Regiones"},
-                    {'value': "prov", 'label': "Provincias"}
-                ],
-                labelStyle={'display': 'inline-block'}
-            ),
-            dcc.Dropdown(
-                id="dataitems_map",
-                multi=False,
-                className="dcc_control",
-                placeholder="Dataitems seleccionados"
-            ),
-            dcc.Graph(
-                id="map",
-                style={
-                    'height': 800,
-                },
-            ),
-        ],
-        className="pretty_container"
-    )
+# def generate_test_map():
+#     return html.Div(
+#         [
+#             dcc.RadioItems(
+#                 id='region_type',
+#                 value="region",
+#                 options=[
+#                     {'value': "region", 'label': "Regiones"},
+#                     {'value': "prov", 'label': "Provincias"}
+#                 ],
+#                 labelStyle={'display': 'inline-block'}
+#             ),
+#             dcc.Dropdown(
+#                 id="dataitems_map",
+#                 multi=False,
+#                 className="dcc_control",
+#                 placeholder="Dataitems seleccionados"
+#             ),
+#             dcc.Graph(
+#                 id="map",
+#                 style={
+#                     'height': 800,
+#                 },
+#             ),
+#         ],
+#         className="pretty_container"
+#     )
 
 
 def generate_layout(language):
@@ -1144,7 +1293,7 @@ def generate_layout(language):
             generate_graph_and_table_containers(language, "temporal"),
             generate_graph_and_table_containers(language, "regional"),
 
-            generate_test_map(),
+            # generate_test_map(),
 
             html.Footer(
                 [
@@ -1229,6 +1378,34 @@ def share_url(search):
         return state.get('start_date', '')[0], state.get('end_date', '')[0], aux, spain_box
     else:
         return str(dt(2020, 2, 21))[0:10], convida_server.get_max_date(), [], []
+
+@dash_app.callback(
+    [Output("temporal-eye-icon", "src"), Output("temporal-graph-container", "style"), Output("graph-settings-container-temporal", "style")],
+    [Input("temporal-eye-icon", "n_clicks")],
+)
+def select_temporal_eye_icon(n_clicks):
+    input_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+    if input_id == 'temporal-eye-icon':
+        if n_clicks % 2 == 0:
+            return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {'display': 'block'}
+        else:
+            return dash_app.get_asset_url("img/eye-dis.svg"), {'display': 'none'}, {'display': 'none'}
+    else:
+        return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {'display': 'block'}
+
+@dash_app.callback(
+    [Output("regional-eye-icon", "src"), Output("regional-graph-container", "style"), Output("graph-settings-container-regional", "style")],
+    [Input("regional-eye-icon", "n_clicks")],
+)
+def select_regional_eye_icon(n_clicks):
+    input_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+    if input_id == 'regional-eye-icon':
+        if n_clicks % 2 == 0:
+            return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {'display': 'block'}
+        else:
+            return dash_app.get_asset_url("img/eye-dis.svg"), {'display': 'none'}, {'display': 'none'}
+    else:
+        return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {'display': 'block'}
 
 
 @dash_app.callback(
