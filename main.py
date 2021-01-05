@@ -887,8 +887,8 @@ def generate_graph_settings_container_with_map(language, graph_type):
                     id='region_type',
                     value="region",
                     options=[
-                        {'value': "region", 'label': "Regiones"},
-                        {'value': "prov", 'label': "Provincias"}
+                        {'value': "region", 'label': convida_dict.get('regions_label').get(language)},
+                        {'value': "prov", 'label': convida_dict.get('provinces_label').get(language)}
                     ],
                     labelStyle={'display': 'inline-block'}
                 ),
@@ -896,7 +896,7 @@ def generate_graph_settings_container_with_map(language, graph_type):
                     id="dataitems_map",
                     multi=False,
                     className="dcc_control",
-                    placeholder="Dataitems seleccionados"
+                    placeholder=convida_dict.get('map_dataitems_label').get(language)
                 ),
             ],
             id="graph-settings-container-{}-right".format(graph_type),
@@ -1218,35 +1218,6 @@ def update_dropdown_map(selected_covid19, selected_ine, selected_mobility, selec
     return [{"label": str(di), "value": str(di)} for di in selected_dataitems]
 
 
-# def generate_test_map():
-#     return html.Div(
-#         [
-#             dcc.RadioItems(
-#                 id='region_type',
-#                 value="region",
-#                 options=[
-#                     {'value': "region", 'label': "Regiones"},
-#                     {'value': "prov", 'label': "Provincias"}
-#                 ],
-#                 labelStyle={'display': 'inline-block'}
-#             ),
-#             dcc.Dropdown(
-#                 id="dataitems_map",
-#                 multi=False,
-#                 className="dcc_control",
-#                 placeholder="Dataitems seleccionados"
-#             ),
-#             dcc.Graph(
-#                 id="map",
-#                 style={
-#                     'height': 800,
-#                 },
-#             ),
-#         ],
-#         className="pretty_container"
-#     )
-
-
 def generate_layout(language):
     """Creates and returns the initial HTML layout of the dashboard.
 
@@ -1387,11 +1358,11 @@ def select_temporal_eye_icon(n_clicks):
     input_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
     if input_id == 'temporal-eye-icon':
         if n_clicks % 2 == 0:
-            return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {'display': 'block'}
+            return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {'display': 'flex'}
         else:
             return dash_app.get_asset_url("img/eye-dis.svg"), {'display': 'none'}, {'display': 'none'}
     else:
-        return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {'display': 'block'}
+        return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {'display': 'flex'}
 
 @dash_app.callback(
     [Output("regional-eye-icon", "src"), Output("regional-graph-container", "style"), Output("graph-settings-container-regional", "style")],
@@ -1401,11 +1372,11 @@ def select_regional_eye_icon(n_clicks):
     input_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
     if input_id == 'regional-eye-icon':
         if n_clicks % 2 == 0:
-            return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {'display': 'block'}
+            return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {"display": "flex"}
         else:
             return dash_app.get_asset_url("img/eye-dis.svg"), {'display': 'none'}, {'display': 'none'}
     else:
-        return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {'display': 'block'}
+        return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {"display": "flex"}
 
 
 @dash_app.callback(

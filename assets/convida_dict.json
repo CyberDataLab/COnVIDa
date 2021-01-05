@@ -191,6 +191,10 @@
     "ES": "Tabla resumen",
     "EN": "Summary table"
   },
+  "map_dataitems_label": {
+    "ES": "Datos seleccionados",
+    "EN": "Selected data"
+  },
   "legend": {
     "ES": "Leyenda",
     "EN": "Legend"
