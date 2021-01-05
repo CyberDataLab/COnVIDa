@@ -1032,11 +1032,8 @@ def display_choropleth(region_type, dataitems_map, start_date, end_date, languag
             # CA Aragón                                               98.7  ...                           1.1
             dfGeo = convida_server.get_data_items(data_items=[dataitems_map[:-1]],
                                                   regions=provs, language=language)
-            print("START HERE")
-            print(dfGeo.columns)
-            print(dfGeo.index)
+
             dfGeo.reset_index(level=0, inplace=True)
-            print(dfGeo)
             dfGeo['Region'] = dfGeo['Region'].apply(lambda x: x.replace("CA ", ""))
 
             fig = px.choropleth_mapbox(dfGeo, geojson=province_map, locations='Region', color=dfGeo.columns.tolist()[1],
@@ -1088,7 +1085,7 @@ def generate_test_map():
                 id="dataitems_map",
                 multi=False,
                 className="dcc_control",
-                placeholder="place"
+                placeholder="Dataitems seleccionados"
             ),
             dcc.Graph(
                 id="map",
