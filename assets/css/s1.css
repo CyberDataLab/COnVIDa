@@ -58,7 +58,7 @@
 }
 
 /* For devices larger than 550px --- 780px */
-@media (min-width: 1000px) {
+@media (min-width: 1350px) {
   .container {
     width: 80%;
   }
@@ -550,7 +550,7 @@ there.
 }
 
 /* Larger than phablet (also point when grid becomes active), screen larger than 550px */
-@media (min-width: 1000px) {
+@media (min-width: 1350px) {
   /* 8% default */
   .one.column,
   .one.columns {
@@ -578,7 +578,7 @@ there.
 }
 
 /* Larger than tablet, for screens smaller than 768px */
-@media (max-width: 1000px) {
+@media (max-width: 1350px) {
   .flex-display {
     display: block !important;
   }
@@ -643,7 +643,7 @@ there.
 }
 
 /* Larger than desktop */
-@media (min-width: 1000px) {
+@media (min-width: 1350px) {
 }
 
 /* Larger than Desktop HD */

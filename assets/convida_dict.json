@@ -43,6 +43,10 @@
     "ES": "Provincias",
     "EN": "Provinces"
   },
+  "spain_label": {
+    "ES": "España",
+    "EN": "Spain"
+  },
   "covid19_data_label": {
     "ES": "Datos de COVID19",
     "EN": "COVID19 data"

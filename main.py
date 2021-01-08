@@ -162,6 +162,9 @@ df_prov['name_length'] = 0
 
 df_prov['name'] = df_prov['name'].replace({'Santa Cruz de Tenerife': "Tenerife"})
 
+with open(PATH + '/assets/maps/europe.json', encoding='utf8') as json_file:
+    europe_map = json.load(json_file)
+
 # Default layout for an empty graph
 empty_graph_layout = dict(
     autosize=True,
@@ -887,6 +890,7 @@ def generate_graph_settings_container_with_map(language, graph_type):
                     id='region_type',
                     value="region",
                     options=[
+                        {'value': "spain", 'label': convida_dict.get('spain_label').get(language)},
                         {'value': "region", 'label': convida_dict.get('regions_label').get(language)},
                         {'value': "prov", 'label': convida_dict.get('provinces_label').get(language)}
                     ],
@@ -929,95 +933,99 @@ def generate_table_container(language, table_type):
         legend.
     """
 
-    return html.Div(
-        [
-            html.Div(
-                [html.H6(convida_dict.get('summary_table_label').get(language),
-                         className="control_label")]
-            ),
-            html.Div(
-                [],
-                id="{}-summary-table".format(table_type),
-                style={"display": "flex"},
-            ),
-            html.Div(
-                [
-                    html.Div(
-                        [
-                            dbc.Button(convida_dict.get('save_raw_data_label').get(language),
-                                       id="{}-save-raw-data-button".format(table_type),
-                                       className="button",
-                                       style={"margin-bottom": "20px"},
-                                       n_clicks=0),
-                            dbc.Button(convida_dict.get('save_summary_data_label').get(language),
-                                       id="{}-save-summary-table-button".format(table_type),
-                                       className="button",
-                                       n_clicks=0),
-                        ],
-                        className="one-half column save-buttons",
-                        style={"text-align": "center"},
-                    ),
-                    html.Div(
-                        [
-                            html.Div(
-                                [
-                                    html.H6(convida_dict.get('legend').get(language),
-                                            className="control_label"),
-                                    html.Div(
-                                        [html.Strong("count: "), convida_dict.get('count-meaning').get(language)],
-                                    ),
-                                    html.Div(
-                                        [html.Strong(html.A("mean",
-                                                            href=convida_dict.get('mean-wiki-link').get(language),
-                                                            target="_blank"),
-                                                     ), html.Strong(": "),
-                                         convida_dict.get('mean-meaning').get(language)],
-                                    ),
-                                    html.Div(
-                                        [html.Strong(html.A("std",
-                                                            href=convida_dict.get('std-wiki-link').get(language),
-                                                            target="_blank"),
-                                                     ), html.Strong(": "),
-                                         convida_dict.get('std-meaning').get(language)],
-                                    ),
-                                    html.Div(
-                                        [html.Strong("min: "), convida_dict.get('min-meaning').get(language)],
-                                    ),
-                                    html.Div(
-                                        [html.Strong("25%: "),
-                                         html.A(convida_dict.get('percentile').get(language),
-                                                href=convida_dict.get('percentile-wiki-link').get(language),
-                                                target="_blank"), " 25"],
-                                    ),
-                                    html.Div(
-                                        [html.Strong("50%: "),
-                                         html.A(convida_dict.get('median').get(language),
-                                                href=convida_dict.get('median-wiki-link').get(language),
-                                                target="_blank")],
-                                    ),
-                                    html.Div(
-                                        [html.Strong("75%: "),
-                                         html.A(convida_dict.get('percentile').get(language),
-                                                href=convida_dict.get('percentile-wiki-link').get(language),
-                                                target="_blank"), " 75"],
-                                    ),
-                                    html.Div(
-                                        [html.Strong("max: "), convida_dict.get('max-meaning').get(language)],
-                                    ),
-                                ],
-                                className="summary-table-legend-container",
-                                id="{}-summary-table-legend-container".format(table_type)
-                            ),
-                        ],
-                        className="one-half column",
-                    ),
-                ],
-                className="row container-display",
-            ),
-        ],
-        className="pretty_container",
-        id="{}-summary-table-container".format(table_type),
-        style={"display": "none"}
+    return html.Div([
+        html.Div(
+            [
+                html.Div(
+                    [html.H6(convida_dict.get('summary_table_label').get(language),
+                             className="control_label")]
+                ),
+                html.Div(
+                    [],
+                    id="{}-summary-table".format(table_type),
+                    style={"display": "flex"},
+                ),
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                dbc.Button(convida_dict.get('save_raw_data_label').get(language),
+                                           id="{}-save-raw-data-button".format(table_type),
+                                           className="button",
+                                           style={"margin-bottom": "20px"},
+                                           n_clicks=0),
+                                dbc.Button(convida_dict.get('save_summary_data_label').get(language),
+                                           id="{}-save-summary-table-button".format(table_type),
+                                           className="button",
+                                           n_clicks=0),
+                            ],
+                            className="one-half column save-buttons",
+                            style={"text-align": "center"},
+                        ),
+                        html.Div(
+                            [
+                                html.Div(
+                                    [
+                                        html.H6(convida_dict.get('legend').get(language),
+                                                className="control_label"),
+                                        html.Div(
+                                            [html.Strong("count: "), convida_dict.get('count-meaning').get(language)],
+                                        ),
+                                        html.Div(
+                                            [html.Strong(html.A("mean",
+                                                                href=convida_dict.get('mean-wiki-link').get(language),
+                                                                target="_blank"),
+                                                         ), html.Strong(": "),
+                                             convida_dict.get('mean-meaning').get(language)],
+                                        ),
+                                        html.Div(
+                                            [html.Strong(html.A("std",
+                                                                href=convida_dict.get('std-wiki-link').get(language),
+                                                                target="_blank"),
+                                                         ), html.Strong(": "),
+                                             convida_dict.get('std-meaning').get(language)],
+                                        ),
+                                        html.Div(
+                                            [html.Strong("min: "), convida_dict.get('min-meaning').get(language)],
+                                        ),
+                                        html.Div(
+                                            [html.Strong("25%: "),
+                                             html.A(convida_dict.get('percentile').get(language),
+                                                    href=convida_dict.get('percentile-wiki-link').get(language),
+                                                    target="_blank"), " 25"],
+                                        ),
+                                        html.Div(
+                                            [html.Strong("50%: "),
+                                             html.A(convida_dict.get('median').get(language),
+                                                    href=convida_dict.get('median-wiki-link').get(language),
+                                                    target="_blank")],
+                                        ),
+                                        html.Div(
+                                            [html.Strong("75%: "),
+                                             html.A(convida_dict.get('percentile').get(language),
+                                                    href=convida_dict.get('percentile-wiki-link').get(language),
+                                                    target="_blank"), " 75"],
+                                        ),
+                                        html.Div(
+                                            [html.Strong("max: "), convida_dict.get('max-meaning').get(language)],
+                                        ),
+                                    ],
+                                    className="summary-table-legend-container",
+                                    id="{}-summary-table-legend-container".format(table_type)
+                                ),
+                            ],
+                            className="one-half column",
+                        ),
+                    ],
+                    className="row container-display",
+                ),
+            ],
+            className="pretty_container",
+            id="{}-summary-table-container".format(table_type),
+            style={"display": "none"}
+        ),
+    ],
+        id="{}-summary-table-wrap".format(table_type),
     )
 
 
@@ -1193,6 +1201,55 @@ def display_choropleth(region_type, dataitems_map, start_date, end_date, languag
             fig.update_coloraxes(colorbar_title_text="")
             return [fig]
 
+    elif region_type == "spain" and dataitems_map is not None:
+
+        # Easy implementation
+        if "*" not in dataitems_map:
+            dfQuery = query_data(start_date, end_date, ['España'],
+                                 [dataitems_map],
+                                 [dataitems_map],
+                                 'temporal', language)
+
+            summary_table = dfQuery.describe()
+            summary_table = summary_table.round(2)
+            summary_table = summary_table.transpose()
+            summary_table = summary_table.reset_index()
+            summary_table = summary_table.rename(columns={'index': ''})
+            print(summary_table)
+            # summary_table['Region'] = summary_table['Region'].apply(lambda x: x.replace("CA ", ""))
+
+            summary_table.rename(columns={'mean': dataitems_map}, inplace=True)
+
+            fig = px.choropleth_mapbox(summary_table, geojson=europe_map, locations='Region', color=dataitems_map,
+                                       mapbox_style="carto-positron", featureidkey="properties.name",
+                                       color_continuous_scale="ylorrd",
+                                       zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                       opacity=0.5,
+                                       )
+            fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+            fig.update_coloraxes(colorbar_title_text="")
+            return [fig]
+
+        else:
+
+            # Region                                                        ...
+            # CA Andalucía                                          1207.9  ...                           0.0
+            # CA Aragón                                               98.7  ...                           1.1
+            dfGeo = convida_server.get_data_items(data_items=[dataitems_map[:-1]],
+                                                  regions=['España'], language=language)
+
+            dfGeo.reset_index(level=0, inplace=True)
+            # dfGeo['Region'] = dfGeo['Region'].apply(lambda x: x.replace("CA ", ""))
+
+            fig = px.choropleth_mapbox(dfGeo, geojson=europe_map, locations='Region', color=dfGeo.columns.tolist()[1],
+                                       mapbox_style="carto-positron", featureidkey="properties.name",
+                                       color_continuous_scale="ylorrd",
+                                       zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                       opacity=0.5,
+                                       )
+            fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+            fig.update_coloraxes(colorbar_title_text="")
+            return [fig]
     # empty map
     else:
         fig = px.choropleth_mapbox(df_region, geojson=region_map, locations='name', color='name_length',
@@ -1350,33 +1407,43 @@ def share_url(search):
     else:
         return str(dt(2020, 2, 21))[0:10], convida_server.get_max_date(), [], []
 
+
 @dash_app.callback(
-    [Output("temporal-eye-icon", "src"), Output("temporal-graph-container", "style"), Output("graph-settings-container-temporal", "style")],
+    [Output("temporal-eye-icon", "src"), Output("temporal-graph-container", "style"),
+     Output("graph-settings-container-temporal", "style"), Output("temporal-summary-table-wrap", "style")],
     [Input("temporal-eye-icon", "n_clicks")],
 )
 def select_temporal_eye_icon(n_clicks):
     input_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
     if input_id == 'temporal-eye-icon':
         if n_clicks % 2 == 0:
-            return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {'display': 'flex'}
+            return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {'display': 'flex'}, {
+                'display': 'block'}
         else:
-            return dash_app.get_asset_url("img/eye-dis.svg"), {'display': 'none'}, {'display': 'none'}
+            return dash_app.get_asset_url("img/eye-dis.svg"), {'display': 'none'}, {'display': 'none'}, {
+                'display': 'none'}
     else:
-        return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {'display': 'flex'}
+        return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {'display': 'flex'}, {
+            'display': 'block'}
+
 
 @dash_app.callback(
-    [Output("regional-eye-icon", "src"), Output("regional-graph-container", "style"), Output("graph-settings-container-regional", "style")],
+    [Output("regional-eye-icon", "src"), Output("regional-graph-container", "style"),
+     Output("graph-settings-container-regional", "style"), Output("regional-summary-table-wrap", "style")],
     [Input("regional-eye-icon", "n_clicks")],
 )
 def select_regional_eye_icon(n_clicks):
     input_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
     if input_id == 'regional-eye-icon':
         if n_clicks % 2 == 0:
-            return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {"display": "flex"}
+            return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {"display": "flex"}, {
+                'display': 'block'}
         else:
-            return dash_app.get_asset_url("img/eye-dis.svg"), {'display': 'none'}, {'display': 'none'}
+            return dash_app.get_asset_url("img/eye-dis.svg"), {'display': 'none'}, {'display': 'none'}, {
+                'display': 'none'}
     else:
-        return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {"display": "flex"}
+        return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {"display": "flex"}, {
+            'display': 'block'}
 
 
 @dash_app.callback(
