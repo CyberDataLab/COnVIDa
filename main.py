@@ -178,7 +178,7 @@ empty_graph_layout = dict(
         type='linear'
     ),
     xasis=dict(
-      tickformat='digits'
+        tickformat='digits'
     ),
 )
 
@@ -1115,7 +1115,11 @@ def update_dropdown_map(selected_covid19, selected_ine, selected_mobility, selec
     ])
 def display_choropleth(region_type, dataitems_map, dataitems_map_options, start_date, end_date, language):
     try:
-        if dataitems_map_options is not None and len(dataitems_map_options) != 0 and dataitems_map is not None and len(dataitems_map) != 0:
+        di_opts = [i['value'] for i in dataitems_map_options]
+        if dataitems_map not in di_opts:
+            dataitems_map = None
+        if dataitems_map_options is not None and len(dataitems_map_options) != 0 and dataitems_map is not None and len(
+                dataitems_map) != 0:
             if region_type == "region":
                 regions = [dropdown_option.get("label") for dropdown_option in regions_options]
                 regions_f = regions_form(list(regions))
