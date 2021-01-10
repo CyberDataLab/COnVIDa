@@ -18,7 +18,7 @@ body {
 #last_update {
     float:right;
     margin-right: 20px;
-    margin-top: 8px;
+    margin-top: 13px;
 }
 #last_update h6 {
     font-size: small;
@@ -26,7 +26,7 @@ body {
 }
 .lang_button, .help_button {
     float: right;
-    height: 25px;
+    height: 30px;
     margin: 5px 10px 10px 0px;
     cursor: pointer;
 }

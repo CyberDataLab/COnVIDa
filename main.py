@@ -177,6 +177,9 @@ empty_graph_layout = dict(
     yaxis=dict(
         type='linear'
     ),
+    xasis=dict(
+      tickformat='digits'
+    ),
 )
 
 # Default annotation for an empty graph
@@ -1088,181 +1091,6 @@ def regions_form_des(regions):
 
 
 @dash_app.callback(
-    [Output("map", "figure")],
-    [Input("region_type", "value"),
-     Input("dataitems_map", "value"),
-     Input('date-picker-range', 'start_date'),
-     Input('date-picker-range', 'end_date')],
-    [
-        State("LANG", "data"),
-    ])
-def display_choropleth(region_type, dataitems_map, start_date, end_date, language):
-    if region_type == "region" and dataitems_map is not None:
-
-        regions = [dropdown_option.get("label") for dropdown_option in regions_options]
-        regions_f = regions_form(list(regions))
-
-        # Easy implementation
-        if "*" not in dataitems_map:
-
-            dfQuery = query_data(start_date, end_date, regions_f,
-                                 [dataitems_map],
-                                 [dataitems_map],
-                                 'temporal', language)
-
-            summary_table = dfQuery.describe()
-            summary_table = summary_table.round(2)
-            summary_table = summary_table.transpose()
-            summary_table = summary_table.reset_index()
-            summary_table = summary_table.rename(columns={'index': ''})
-            summary_table['Region'] = summary_table['Region'].apply(lambda x: x.replace("CA ", ""))
-
-            summary_table.rename(columns={'mean': dataitems_map}, inplace=True)
-
-            fig = px.choropleth_mapbox(summary_table, geojson=region_map, locations='Region', color=dataitems_map,
-                                       mapbox_style="carto-positron", featureidkey="properties.name",
-                                       color_continuous_scale="ylorrd",
-                                       zoom=4, center={"lat": 40.463667, "lon": -3.74922},
-                                       opacity=0.5,
-                                       )
-            fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
-            fig.update_coloraxes(colorbar_title_text="")
-            return [fig]
-
-
-        else:
-
-            # Con dfGeo ya devuelve el valor para cada Region
-            # Region                                                        ...
-            # CA Andalucía                                          1207.9  ...                           0.0
-            # CA Aragón                                               98.7  ...                           1.1
-            dfGeo = convida_server.get_data_items(data_items=[dataitems_map[:-1]],
-                                                  regions=regions_f, language=language)
-            dfGeo.reset_index(level=0, inplace=True)
-            dfGeo['Region'] = dfGeo['Region'].apply(lambda x: x.replace("CA ", ""))
-            fig = px.choropleth_mapbox(dfGeo, geojson=region_map, locations='Region', color=dfGeo.columns.tolist()[1],
-                                       mapbox_style="carto-positron", featureidkey="properties.name",
-                                       color_continuous_scale="ylorrd",
-                                       zoom=4, center={"lat": 40.463667, "lon": -3.74922},
-                                       opacity=0.5,
-                                       )
-            fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
-            fig.update_coloraxes(colorbar_title_text="")
-            return [fig]
-
-    elif region_type == "prov" and dataitems_map is not None:
-
-        provs = [dropdown_option.get("label") for dropdown_option in province_options]
-
-        # Easy implementation
-        if "*" not in dataitems_map:
-            dfQuery = query_data(start_date, end_date, provs,
-                                 [dataitems_map],
-                                 [dataitems_map],
-                                 'temporal', language)
-
-            summary_table = dfQuery.describe()
-            summary_table = summary_table.round(2)
-            summary_table = summary_table.transpose()
-            summary_table = summary_table.reset_index()
-            summary_table = summary_table.rename(columns={'index': ''})
-            summary_table['Region'] = summary_table['Region'].apply(lambda x: x.replace("CA ", ""))
-
-            summary_table.rename(columns={'mean': dataitems_map}, inplace=True)
-
-            fig = px.choropleth_mapbox(summary_table, geojson=province_map, locations='Region', color=dataitems_map,
-                                       mapbox_style="carto-positron", featureidkey="properties.name",
-                                       color_continuous_scale="ylorrd",
-                                       zoom=4, center={"lat": 40.463667, "lon": -3.74922},
-                                       opacity=0.5,
-                                       )
-            fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
-            fig.update_coloraxes(colorbar_title_text="")
-            return [fig]
-
-        else:
-
-            # Region                                                        ...
-            # CA Andalucía                                          1207.9  ...                           0.0
-            # CA Aragón                                               98.7  ...                           1.1
-            dfGeo = convida_server.get_data_items(data_items=[dataitems_map[:-1]],
-                                                  regions=provs, language=language)
-
-            dfGeo.reset_index(level=0, inplace=True)
-            dfGeo['Region'] = dfGeo['Region'].apply(lambda x: x.replace("CA ", ""))
-
-            fig = px.choropleth_mapbox(dfGeo, geojson=province_map, locations='Region', color=dfGeo.columns.tolist()[1],
-                                       mapbox_style="carto-positron", featureidkey="properties.name",
-                                       color_continuous_scale="ylorrd",
-                                       zoom=4, center={"lat": 40.463667, "lon": -3.74922},
-                                       opacity=0.5,
-                                       )
-            fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
-            fig.update_coloraxes(colorbar_title_text="")
-            return [fig]
-
-    elif region_type == "spain" and dataitems_map is not None:
-
-        # Easy implementation
-        if "*" not in dataitems_map:
-            dfQuery = query_data(start_date, end_date, ['España'],
-                                 [dataitems_map],
-                                 [dataitems_map],
-                                 'temporal', language)
-
-            summary_table = dfQuery.describe()
-            summary_table = summary_table.round(2)
-            summary_table = summary_table.transpose()
-            summary_table = summary_table.reset_index()
-            summary_table = summary_table.rename(columns={'index': ''})
-            print(summary_table)
-            # summary_table['Region'] = summary_table['Region'].apply(lambda x: x.replace("CA ", ""))
-
-            summary_table.rename(columns={'mean': dataitems_map}, inplace=True)
-
-            fig = px.choropleth_mapbox(summary_table, geojson=europe_map, locations='Region', color=dataitems_map,
-                                       mapbox_style="carto-positron", featureidkey="properties.name",
-                                       color_continuous_scale="ylorrd",
-                                       zoom=4, center={"lat": 40.463667, "lon": -3.74922},
-                                       opacity=0.5,
-                                       )
-            fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
-            fig.update_coloraxes(colorbar_title_text="")
-            return [fig]
-
-        else:
-
-            # Region                                                        ...
-            # CA Andalucía                                          1207.9  ...                           0.0
-            # CA Aragón                                               98.7  ...                           1.1
-            dfGeo = convida_server.get_data_items(data_items=[dataitems_map[:-1]],
-                                                  regions=['España'], language=language)
-
-            dfGeo.reset_index(level=0, inplace=True)
-            # dfGeo['Region'] = dfGeo['Region'].apply(lambda x: x.replace("CA ", ""))
-
-            fig = px.choropleth_mapbox(dfGeo, geojson=europe_map, locations='Region', color=dfGeo.columns.tolist()[1],
-                                       mapbox_style="carto-positron", featureidkey="properties.name",
-                                       color_continuous_scale="ylorrd",
-                                       zoom=4, center={"lat": 40.463667, "lon": -3.74922},
-                                       opacity=0.5,
-                                       )
-            fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
-            fig.update_coloraxes(colorbar_title_text="")
-            return [fig]
-    # empty map
-    else:
-        fig = px.choropleth_mapbox(df_region, geojson=region_map, locations='name', color='name_length',
-                                   mapbox_style="carto-positron",
-                                   zoom=4, center={"lat": 40.463667, "lon": -3.74922},
-                                   opacity=0.5,
-                                   )
-        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
-        fig.update_coloraxes(colorbar_title_text="")
-        return [fig]
-
-
-@dash_app.callback(
     Output("dataitems_map", "options"),
     [Input("selected_covid19", "value"),
      Input("selected_ine", "value"),
@@ -1273,6 +1101,195 @@ def update_dropdown_map(selected_covid19, selected_ine, selected_mobility, selec
     ine_mod = [i + '*' for i in selected_ine]
     selected_dataitems = selected_covid19 + ine_mod + selected_mobility + selected_momo + selected_aemet
     return [{"label": str(di), "value": str(di)} for di in selected_dataitems]
+
+
+@dash_app.callback(
+    [Output("map", "figure")],
+    [Input("region_type", "value"),
+     Input("dataitems_map", "value"),
+     Input("dataitems_map", "options"),
+     Input('date-picker-range', 'start_date'),
+     Input('date-picker-range', 'end_date')],
+    [
+        State("LANG", "data"),
+    ])
+def display_choropleth(region_type, dataitems_map, dataitems_map_options, start_date, end_date, language):
+    try:
+        if dataitems_map_options is not None and len(dataitems_map_options) != 0 and dataitems_map is not None and len(dataitems_map) != 0:
+            if region_type == "region":
+                regions = [dropdown_option.get("label") for dropdown_option in regions_options]
+                regions_f = regions_form(list(regions))
+
+                # Easy implementation
+                if "*" not in dataitems_map:
+
+                    dfQuery = query_data(start_date, end_date, regions_f,
+                                         [dataitems_map],
+                                         [dataitems_map],
+                                         'temporal', language)
+
+                    summary_table = dfQuery.describe()
+                    summary_table = summary_table.round(2)
+                    summary_table = summary_table.transpose()
+                    summary_table = summary_table.reset_index()
+                    summary_table = summary_table.rename(columns={'index': ''})
+                    summary_table['Region'] = summary_table['Region'].apply(lambda x: x.replace("CA ", ""))
+
+                    summary_table.rename(columns={'mean': dataitems_map}, inplace=True)
+
+                    fig = px.choropleth_mapbox(summary_table, geojson=region_map, locations='Region',
+                                               color=dataitems_map,
+                                               mapbox_style="carto-positron", featureidkey="properties.name",
+                                               color_continuous_scale="ylorrd",
+                                               zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                               opacity=0.5,
+                                               )
+                    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                    fig.update_coloraxes(colorbar_title_text="")
+                    return [fig]
+
+
+                else:
+
+                    # Con dfGeo ya devuelve el valor para cada Region
+                    # Region                                                        ...
+                    # CA Andalucía                                          1207.9  ...                           0.0
+                    # CA Aragón                                               98.7  ...                           1.1
+                    dfGeo = convida_server.get_data_items(data_items=[dataitems_map[:-1]],
+                                                          regions=regions_f, language=language)
+                    dfGeo.reset_index(level=0, inplace=True)
+                    dfGeo['Region'] = dfGeo['Region'].apply(lambda x: x.replace("CA ", ""))
+                    fig = px.choropleth_mapbox(dfGeo, geojson=region_map, locations='Region',
+                                               color=dfGeo.columns.tolist()[1],
+                                               mapbox_style="carto-positron", featureidkey="properties.name",
+                                               color_continuous_scale="ylorrd",
+                                               zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                               opacity=0.5,
+                                               )
+                    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                    fig.update_coloraxes(colorbar_title_text="")
+                    return [fig]
+
+            elif region_type == "prov":
+                provs = [dropdown_option.get("label") for dropdown_option in province_options]
+
+                # Easy implementation
+                if "*" not in dataitems_map:
+                    dfQuery = query_data(start_date, end_date, provs,
+                                         [dataitems_map],
+                                         [dataitems_map],
+                                         'temporal', language)
+
+                    summary_table = dfQuery.describe()
+                    summary_table = summary_table.round(2)
+                    summary_table = summary_table.transpose()
+                    summary_table = summary_table.reset_index()
+                    summary_table = summary_table.rename(columns={'index': ''})
+                    summary_table['Region'] = summary_table['Region'].apply(lambda x: x.replace("CA ", ""))
+
+                    summary_table.rename(columns={'mean': dataitems_map}, inplace=True)
+
+                    fig = px.choropleth_mapbox(summary_table, geojson=province_map, locations='Region',
+                                               color=dataitems_map,
+                                               mapbox_style="carto-positron", featureidkey="properties.name",
+                                               color_continuous_scale="ylorrd",
+                                               zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                               opacity=0.5,
+                                               )
+                    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                    fig.update_coloraxes(colorbar_title_text="")
+                    return [fig]
+
+                else:
+
+                    # Region                                                        ...
+                    # CA Andalucía                                          1207.9  ...                           0.0
+                    # CA Aragón                                               98.7  ...                           1.1
+                    dfGeo = convida_server.get_data_items(data_items=[dataitems_map[:-1]],
+                                                          regions=provs, language=language)
+
+                    dfGeo.reset_index(level=0, inplace=True)
+                    dfGeo['Region'] = dfGeo['Region'].apply(lambda x: x.replace("CA ", ""))
+
+                    fig = px.choropleth_mapbox(dfGeo, geojson=province_map, locations='Region',
+                                               color=dfGeo.columns.tolist()[1],
+                                               mapbox_style="carto-positron", featureidkey="properties.name",
+                                               color_continuous_scale="ylorrd",
+                                               zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                               opacity=0.5,
+                                               )
+                    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                    fig.update_coloraxes(colorbar_title_text="")
+                    return [fig]
+
+            elif region_type == "spain":
+                # Easy implementation
+                if "*" not in dataitems_map:
+                    dfQuery = query_data(start_date, end_date, ['España'],
+                                         [dataitems_map],
+                                         [dataitems_map],
+                                         'temporal', language)
+
+                    summary_table = dfQuery.describe()
+                    summary_table = summary_table.round(2)
+                    summary_table = summary_table.transpose()
+                    summary_table = summary_table.reset_index()
+                    summary_table = summary_table.rename(columns={'index': ''})
+
+                    summary_table.rename(columns={'mean': dataitems_map}, inplace=True)
+
+                    fig = px.choropleth_mapbox(summary_table, geojson=europe_map, locations='Region',
+                                               color=dataitems_map,
+                                               mapbox_style="carto-positron", featureidkey="properties.name",
+                                               color_continuous_scale="ylorrd",
+                                               zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                               opacity=0.5,
+                                               )
+                    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                    fig.update_coloraxes(colorbar_title_text="")
+                    return [fig]
+
+                else:
+
+                    # Region                                                        ...
+                    # CA Andalucía                                          1207.9  ...                           0.0
+                    # CA Aragón                                               98.7  ...                           1.1
+                    dfGeo = convida_server.get_data_items(data_items=[dataitems_map[:-1]],
+                                                          regions=['España'], language=language)
+
+                    dfGeo.reset_index(level=0, inplace=True)
+                    # dfGeo['Region'] = dfGeo['Region'].apply(lambda x: x.replace("CA ", ""))
+
+                    fig = px.choropleth_mapbox(dfGeo, geojson=europe_map, locations='Region',
+                                               color=dfGeo.columns.tolist()[1],
+                                               mapbox_style="carto-positron", featureidkey="properties.name",
+                                               color_continuous_scale="ylorrd",
+                                               zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                               opacity=0.5,
+                                               )
+                    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                    fig.update_coloraxes(colorbar_title_text="")
+                    return [fig]
+
+        # empty map
+        else:
+            fig = px.choropleth_mapbox(df_region, geojson=region_map, locations='name', color='name_length',
+                                       mapbox_style="carto-positron",
+                                       zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                       opacity=0.5,
+                                       )
+            fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+            fig.update_coloraxes(colorbar_title_text="")
+            return [fig]
+    except:
+        fig = px.choropleth_mapbox(df_region, geojson=region_map, locations='name', color='name_length',
+                                   mapbox_style="carto-positron",
+                                   zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                   opacity=0.5,
+                                   )
+        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+        fig.update_coloraxes(colorbar_title_text="")
+        return [fig]
 
 
 def generate_layout(language):
