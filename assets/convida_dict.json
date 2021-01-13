@@ -36,12 +36,28 @@
     "EN": "Add Spain"
   },
   "regions_label": {
-    "ES": "Regiones",
-    "EN": "Regions"
+    "ES": "Comunidades Autónomas",
+    "EN": "Autonomous Communities"
   },
   "provinces_label": {
     "ES": "Provincias",
     "EN": "Provinces"
+  },
+  "filter_label": {
+    "ES": "Filtrar por:",
+    "EN": "Filter by:"
+  },
+  "measure_label": {
+    "ES": "Medida:",
+    "EN": "Measure:"
+  },
+  "mean_label": {
+    "ES": "media",
+    "EN": "mean"
+  },
+  "median_label": {
+    "ES": "mediana",
+    "EN": "median"
   },
   "spain_label": {
     "ES": "España",
@@ -126,6 +142,10 @@
   "share": {
     "ES": "Compartir",
     "EN": "Share"
+  },
+  "eye": {
+    "ES": "Mostrar/Ocultar",
+    "EN": "Show/Hide"
   },
   "temporal_visualization_label": {
     "ES": "Visualización temporal",

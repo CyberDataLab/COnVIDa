@@ -67,7 +67,7 @@ body {
 
 .control_label {
     padding: 10px 10px 0px 10px;
-    width: calc(100% - 40px);
+    /*width: calc(100% - 40px);*/
     font-weight: bold;
 }
 
