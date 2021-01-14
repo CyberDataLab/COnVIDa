@@ -40,14 +40,19 @@ body {
     box-shadow: 2px 2px 2px lightgrey;
 }
 
+.pretty_container.graph {
+    width: 48%;
+}
+.pretty_container.map {
+    width: 48%;
+}
+
 .pretty_container_regional {
     border-radius: 5px;
     background-color: #f9f9f9;
     margin: 3px 10px 10px 10px;
     padding: 15px;
     position: relative;
-    box-shadow: 2px 2px 2px lightgrey;
-    width: 50%;
 }
 
 .bare_container {

@@ -235,6 +235,10 @@
     "ES": "Datos seleccionados",
     "EN": "Selected data"
   },
+  "select_type_dataitem": {
+    "ES": "Selecciona el dataitem a mostrar",
+    "EN": "Select the dataitem to display"
+  },
   "legend": {
     "ES": "Leyenda",
     "EN": "Legend"
@@ -284,8 +288,12 @@
     "EN": "https://en.wikipedia.org/wiki/Median"
   },
   "footer_1": {
-    "ES": "Proyecto desarrollado por el CyberDataLab de la Universidad de Murcia",
-    "EN": "Project developed by the CyberDataLab at the University of Murcia (Spain)"
+    "ES": "Proyecto desarrollado por el ",
+    "EN": "Project developed by the "
+  },
+  "footer_1_1": {
+    "ES": " de la Universidad de Murcia",
+    "EN": " at the University of Murcia (Spain)"
   },
   "footer_2": {
     "ES": "Contacte con nosotros a través de ",

@@ -107,10 +107,14 @@
   }
 
   .one-third.column {
-    width: 30.6666666667%;
+    width: 36.6666666667%;
     text-align: center;
     padding: 10px;
   }
+  #cyber-umu-logos{
+    width: 50%;
+  }
+
   .two-thirds.column {
     width: 65.3333333333%;
   }
@@ -588,6 +592,12 @@ there.
   .pretty_container {
     margin: 0 !important;
     margin-bottom: 25px !important;
+  }
+  #cyberdatalab-a {
+    margin-right: 20px;
+  }
+  #umu-a {
+    margin-left: 20px;
   }
   .container-display {
     display: flex;
