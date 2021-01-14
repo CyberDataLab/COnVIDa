@@ -633,6 +633,22 @@ there.
     margin-bottom: 20px;
   }
 
+  #regional-inner-graph-container {
+    display: block !important;
+  }
+  #regional_graph {
+    width: 100% !important;
+  }
+  #map {
+    width: 100% !important;
+  }
+  #graph-settings-container-regional-left {
+    display: none !important;
+  }
+  #graph-settings-container-regional-right {
+    width: 100% !important;
+  }
+
 }
 
 @media (max-width: 810px) {

@@ -44,8 +44,8 @@
     "EN": "Provinces"
   },
   "filter_label": {
-    "ES": "Filtrar por:",
-    "EN": "Filter by:"
+    "ES": "Mostrar por:",
+    "EN": "Show by:"
   },
   "measure_label": {
     "ES": "Medida:",
@@ -55,9 +55,25 @@
     "ES": "media",
     "EN": "mean"
   },
+  "max_label": {
+    "ES": "límite superior",
+    "EN": "upper limit"
+  },
+  "min_label": {
+    "ES": "límite inferior",
+    "EN": "lower limit"
+  },
+  "q1_label": {
+    "ES": "percentil 25",
+    "EN": "percentile 25"
+  },
   "median_label": {
     "ES": "mediana",
     "EN": "median"
+  },
+  "q3_label": {
+    "ES": "percentil 75",
+    "EN": "percentile 75"
   },
   "spain_label": {
     "ES": "España",

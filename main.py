@@ -735,6 +735,7 @@ def generate_graph_container_with_map(language, graph_type):
                             },
                         ),
                     ],
+                        id="{}-inner-graph-container".format(graph_type),
                         style={"display": "flex"},
                     )
                 ],
@@ -875,11 +876,11 @@ def generate_graph_settings_container_with_map(language, graph_type):
                         value="mean",
                         options=[
                             {'value': "mean", 'label': convida_dict.get('mean_label').get(language)},
-                            {'value': "max", 'label': 'max'},
-                            {'value': "min", 'label': 'min'},
-                            {'value': "25%", 'label': 'q1'},
+                            {'value': "max", 'label': convida_dict.get('max_label').get(language)},
+                            {'value': "min", 'label': convida_dict.get('min_label').get(language)},
+                            {'value': "25%", 'label': convida_dict.get('q1_label').get(language)},
                             {'value': "50%", 'label': convida_dict.get('median_label').get(language)},
-                            {'value': "75%", 'label': 'q3'}
+                            {'value': "75%", 'label': convida_dict.get('q3_label').get(language)}
                         ],
                         labelStyle={'display': 'inline-block'},
                         style={'padding': '10px 10px 0px 10px'}
@@ -1102,9 +1103,27 @@ def update_dropdown_map(selected_covid19, selected_ine, selected_mobility, selec
     selected_dataitems = selected_covid19 + ine_mod + selected_mobility + selected_momo + selected_aemet
     output = [{"label": str(di), "value": str(di)} for di in selected_dataitems]
     if len(output) != 0:
-        return output, output[0]['value']
+        return output, output[-1]['value']
     return output, dash.no_update
 
+@dash_app.callback(
+    [Output("region_type", "value")],
+    [Input('selected_regions', 'value'),
+     Input('selected_provinces', 'value'),
+     Input('select_spain', 'value')],
+    [
+        State("LANG", "data"),
+    ])
+def showby_radioitems(selected_regions, selected_provinces, select_spain, language):
+
+    if len(selected_regions) > 0 and len(selected_provinces) == 0:
+        return ["region"]
+    elif len(selected_provinces) > 0 and len(selected_regions) == 0:
+        return ["prov"]
+    elif len(selected_regions) == 0 and len(selected_provinces) == 0 and len(select_spain) != 0:
+        return ["spain"]
+    else:
+        return ['']
 
 @dash_app.callback(
     [Output("map", "figure")],
@@ -1128,6 +1147,7 @@ def display_choropleth(region_type, measure_type, dataitems_map, dataitems_map_o
                 dataitems_map = di_opts[0]
             else:
                 dataitems_map = None
+
         if dataitems_map_options is not None and len(dataitems_map_options) != 0 and dataitems_map is not None and len(
                 dataitems_map) != 0:
             if region_type == "region" and len(selected_regions) != 0:
@@ -1885,7 +1905,7 @@ def regional_update_graph_and_table(start_date, end_date,
     b.dropna()
     b['Region'] = regions_form_des(b['Region'])
     fig = px.box(b, x="Region", y="Dataitems", color="Item")
-    fig.update_traces(quartilemethod="exclusive")  # or "inclusive", or "linear" by default
+    fig.update_traces(quartilemethod="exclusive", boxmean=True)
     fig.update_layout(legend=dict(yanchor="top", y=0.99, orientation="h"))
 
     output = [params, fig,
