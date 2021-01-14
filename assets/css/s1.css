@@ -643,13 +643,13 @@ there.
     margin-bottom: 20px;
   }
 
-  #regional-inner-graph-container {
+  #regional-wrap-container {
     display: block !important;
   }
-  #regional_graph {
+  .pretty_container.graph {
     width: 100% !important;
   }
-  #map {
+  .pretty_container.map {
     width: 100% !important;
   }
   #graph-settings-container-regional-left {
