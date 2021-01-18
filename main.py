@@ -140,7 +140,7 @@ def help_es():
 # to be used as the options for the dropdown of Regions
 regions_options = [
     {"label": str(region), "value": str(region)}
-    for region in Regions.get_regions_by_type('r', 'ES')
+    for region in Regions.get_regions_by_type('c', 'ES')
 ]
 
 regions_map_names = [i['value'] for i in regions_options]
