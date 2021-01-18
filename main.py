@@ -1218,7 +1218,7 @@ def showby_radioitems(selected_regions, selected_provinces, select_spain, langua
 def dropdown_ine_map(dataitems_map, selected_regions, language):
     regions = selected_regions
     regions_f = regions_form(list(regions))
-    if len(regions_f) != 0 and len(dataitems_map) != 0:
+    if len(regions_f) != 0 and dataitems_map is not None:
         if '*' in dataitems_map:
             dfGeo = convida_server.get_data_items(data_items=[dataitems_map[:-1]],
                                                   regions=regions_f, language=language)
@@ -1254,17 +1254,18 @@ def dropdown_ine_map(dataitems_map, selected_regions, language):
      Input('date-picker-range', 'start_date'),
      Input('date-picker-range', 'end_date'),
      Input('selected_regions', 'value'),
-     Input('selected_provinces', 'value')],
+     Input('selected_provinces', 'value'),
+     Input('select_spain', 'value')],
     [
         State("LANG", "data"),
     ])
 def display_choropleth(region_type, measure_type, dataitems_map, dataitems_map_options, dataitems_map_ine, start_date, end_date,
                        selected_regions,
-                       selected_provinces, language):
+                       selected_provinces, select_spain, language):
 
     allcookies = dict(flask.request.cookies)
 
-    if ("convida-dashboard" not in allcookies and len(selected_regions) == 0 and len(selected_provinces) == 0):
+    if ("convida-dashboard" not in allcookies and len(selected_regions) == 0 and len(selected_provinces) == 0 and len(select_spain) == 0):
         select_spain = ["España"]
         if (language == "ES"):
             region_type = "region"
@@ -1956,7 +1957,7 @@ def temporal_update_graph_and_table(start_date, end_date,
     params = locals()
     allcookies = dict(flask.request.cookies)
 
-    if ("convida-dashboard" not in allcookies and len(selected_regions) == 0 and len(selected_provinces) == 0):
+    if ("convida-dashboard" not in allcookies and len(selected_regions) == 0 and len(selected_provinces) == 0 and len(select_spain) == 0):
         select_spain = ["España"]
         if (language == "ES"):
             selected_covid19 = ['Casos diarios']
@@ -2084,18 +2085,20 @@ def temporal_update_graph_and_table(start_date, end_date,
     ],
     [
         State("LANG", "data"),
+        State("share_temporal", "data"),
     ]
 )
 def regional_update_graph_and_table(start_date, end_date,
                                     selected_regions, selected_provinces, select_spain, selected_covid19,
                                     selected_ine, selected_mobility,
                                     selected_momo, selected_aemet,
-                                    language):
+                                    language,
+                                    cookies):
     # print(f'{start_date} {end_date} {selected_regions} {selected_covid19} {language}')
     params = locals()
     allcookies = dict(flask.request.cookies)
 
-    if ("convida-dashboard" not in allcookies and len(selected_regions) == 0 and len(selected_provinces) == 0):
+    if ("convida-dashboard" not in allcookies and len(selected_regions) == 0 and len(selected_provinces) == 0 and len(select_spain) == 0):
         select_spain = ["España"]
         if (language == "ES"):
             selected_covid19 = ['Casos diarios']
@@ -2119,6 +2122,20 @@ def regional_update_graph_and_table(start_date, end_date,
         figure = dict(data=[], layout=layout_graph)
         output = [params, figure, []]
         return output
+
+    if (cookies):
+        cookies.pop("cookies")
+        cookies["selected_regions"] = selected_regions
+        cookies["selected_provinces"] = selected_provinces
+        cookies["select_spain"] = select_spain
+        cookies["selected_covid19"] = selected_covid19
+        cookies["selected_ine"] = selected_ine
+        cookies["selected_mobility"] = selected_mobility
+        cookies["selected_momo"] = selected_momo
+        cookies["selected_aemet"] = selected_aemet
+
+        string = json.dumps(cookies)
+        dash.callback_context.response.set_cookie('convida-dashboard', string, max_age=86400)
 
     logging = False  # To avoid double logging
 

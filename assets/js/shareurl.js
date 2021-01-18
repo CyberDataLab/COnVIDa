@@ -18,6 +18,9 @@ window.dash_clientside.clientside = {
                 // delete data['language']
                 delete data['selected_plot_scale']
                 delete data['selected_graph_type']
+                if ("cookies" in data) {
+                    delete data['cookies']
+                }
                 let u = new URLSearchParams(data).toString();
                 output = 'https://convida.inf.um.es/?' + u
                 copyToClipboard(output)
