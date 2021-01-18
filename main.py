@@ -24,6 +24,10 @@ import sys
 # import uwsgidecorators
 import time
 from urllib.parse import urlparse, parse_qs
+import plotly.express as px
+import plotly.graph_objects as go
+
+# sys.stderr = open('err.txt', 'w')
 
 PORT = 8899
 # Developing: DEBUG = True
@@ -136,12 +140,31 @@ def help_es():
 # to be used as the options for the dropdown of Regions
 regions_options = [
     {"label": str(region), "value": str(region)}
-    for region in Regions.get_regions_by_type('r', 'ES')
+    for region in Regions.get_regions_by_type('c', 'ES')
 ]
+
+regions_map_names = [i['value'] for i in regions_options]
+with open(PATH + '/assets/maps/spain-communities.json', encoding='utf8') as json_file:
+    region_map = json.load(json_file)
+
+df_region = pd.DataFrame(regions_map_names, columns=['name'])
+df_region['name_length'] = df_region['name'].str.len()
+
 province_options = [
     {"label": str(region), "value": str(region)}
     for region in Regions.get_regions_by_type('p', 'ES')
 ]
+prov_map_names = [i['value'] for i in province_options]
+with open(PATH + '/assets/maps/spain-provinces.json', encoding='utf8') as json_file:
+    province_map = json.load(json_file)
+
+df_prov = pd.DataFrame(prov_map_names, columns=['name'])
+df_prov['name_length'] = 0
+
+df_prov['name'] = df_prov['name'].replace({'Santa Cruz de Tenerife': "Tenerife"})
+
+with open(PATH + '/assets/maps/europe.json', encoding='utf8') as json_file:
+    europe_map = json.load(json_file)
 
 # Default layout for an empty graph
 empty_graph_layout = dict(
@@ -154,6 +177,9 @@ empty_graph_layout = dict(
     legend=dict(font=dict(size=10), orientation="h", y=-0.2),
     yaxis=dict(
         type='linear'
+    ),
+    xasis=dict(
+        tickformat='digits'
     ),
 )
 
@@ -254,6 +280,19 @@ def generate_header(language):
                     html.A(
                         [
                             html.Img(
+                                src=dash_app.get_asset_url("img/cyberdatalab-logo.png"),
+                                id="cyberdatalab-logo",
+                                style={"height": "60px"},
+                            ),
+                        ],
+                        href="https://cyberdatalab.um.es/",
+                        target="_blank",
+                        style={"margin-right": "10px"},
+                        id='cyberdatalab-a'
+                    ),
+                    html.A(
+                        [
+                            html.Img(
                                 src=dash_app.get_asset_url("img/umu-logo.png"),
                                 id="umu-logo",
                                 style={"height": "60px"},
@@ -261,6 +300,8 @@ def generate_header(language):
                         ],
                         href="https://www.um.es",
                         target="_blank",
+                        style={"margin-left": "10px"},
+                        id='umu-a'
                     ),
                 ],
                 style={
@@ -268,6 +309,7 @@ def generate_header(language):
                     "text-align": "center",
                 },
                 className="one-third column",
+                id="cyber-umu-logos"
             ),
         ],
         id="header",
@@ -654,6 +696,7 @@ def generate_graph_container(language, graph_type):
                         style={
                             'height': 800
                         },
+                        responsive=True
                     )
                 ],
                 type="circle",
@@ -662,6 +705,130 @@ def generate_graph_container(language, graph_type):
         id="{}-graph-container".format(graph_type),
         className="pretty_container",
     )
+
+
+def generate_graph_container_with_map(language, graph_type):
+    """Creates and returns the HTML code for the graph container
+    of the dashboard.
+
+    Parameters
+    ----------
+    language : str
+        The language to be used (e.g., 'ES' or 'EN')
+    graph_type : str
+        The type of graph to be generated (e.g., 'temporal' or 'regional')
+
+    Returns
+    -------
+    html
+        HTML code for the graph container of the dashboard
+        including the loading wheel functionality
+    """
+
+    return html.Div([
+        html.Div(
+            [
+                dcc.Loading(
+                    [
+                        dcc.Graph(
+                            id="{}_graph".format(graph_type),
+                            config={
+                                "locale": "es" if language == 'ES' else "en-US",
+                                "displaylogo": False,
+                            },
+                            figure={
+                                "layout": empty_graph_layout,
+                            },
+                            style={
+                                'height': 980,
+                            },
+                            responsive=True
+                        ),
+                    ],
+                    type="circle",
+                ),
+            ],
+            id="{}-graph-container".format(graph_type),
+            className="pretty_container graph",
+        ),
+        html.Div(
+            [
+                dcc.Loading(
+                    [
+                        dcc.Graph(
+                            id="map",
+                            style={
+                                'height': 800,
+                                'width': '100%',
+                            },
+                        ),
+                    ],
+                    type="circle",
+                ),
+                html.Div(
+                    [
+                        html.Div([
+                            html.H6(convida_dict.get('filter_label').get(language),
+                                    className="control_label"),
+                            dcc.RadioItems(
+                                id='region_type',
+                                value="region",
+                                options=[
+                                    {'value': "spain", 'label': convida_dict.get('spain_label').get(language)},
+                                    {'value': "region", 'label': convida_dict.get('regions_label').get(language)},
+                                    {'value': "prov", 'label': convida_dict.get('provinces_label').get(language)}
+                                ],
+                                labelStyle={'display': 'inline-block'},
+                                style={'padding': '10px 10px 0px 10px'}
+                            ),
+                        ],
+                            style={'display': 'flex'}
+                        ),
+                        html.Div([
+                            html.H6(convida_dict.get('measure_label').get(language),
+                                    className="control_label"),
+                            dcc.RadioItems(
+                                id='measure_type',
+                                value="mean",
+                                options=[
+                                    {'value': "mean", 'label': convida_dict.get('mean_label').get(language)},
+                                    {'value': "max", 'label': convida_dict.get('max_label').get(language)},
+                                    {'value': "min", 'label': convida_dict.get('min_label').get(language)},
+                                    {'value': "25%", 'label': convida_dict.get('q1_label').get(language)},
+                                    {'value': "50%", 'label': convida_dict.get('median_label').get(language)},
+                                    {'value': "75%", 'label': convida_dict.get('q3_label').get(language)}
+                                ],
+                                labelStyle={'display': 'inline-block'},
+                                style={'padding': '10px 10px 0px 10px'}
+                            ),
+                        ],
+                            style={'display': 'flex'}
+                        ),
+                        dcc.Dropdown(
+                            id="dataitems_map",
+                            multi=False,
+                            className="dcc_control",
+                            placeholder=convida_dict.get('map_dataitems_label').get(language)
+                        ),
+                        dcc.Dropdown(
+                            id="dataitems_map_ine",
+                            multi=False,
+                            className="dcc_control",
+                            placeholder=convida_dict.get('select_type_dataitem').get(language),
+                            style={'display': 'none'}
+                        ),
+                    ],
+                    id="graph-settings-container-{}-right".format(graph_type),
+                    className="pretty_container_regional",
+                ),
+
+            ],
+            id="{}-map-container".format(graph_type),
+            className="pretty_container map",
+        )
+    ],
+        id="{}-wrap-container".format(graph_type),
+        style={"display": "flex"})
 
 
 def generate_graph_settings_container(language, graph_type):
@@ -705,7 +872,7 @@ def generate_graph_settings_container(language, graph_type):
                         searchable=False
                     ),
                 ],
-                style={"width": "100%"},
+                style={"width": "100%"} if graph_type == "temporal" else {'display': 'none'},
             ),
             html.Div(
                 [
@@ -732,6 +899,95 @@ def generate_graph_settings_container(language, graph_type):
         style={"display": "flex"},
     )
 
+#
+# def generate_graph_settings_container_with_map(language, graph_type):
+#     """Creates and returns the HTML code for the graph settings
+#     container of the dashboard.
+#
+#     Parameters
+#     ----------
+#     language : str
+#         The language to be used (e.g., 'ES' or 'EN')
+#     graph_type : str
+#         The type of graph whose settings are to be generated
+#         (e.g., 'temporal' or 'regional')
+#
+#     Returns
+#     -------
+#     html
+#         HTML code for the graph settings container of the dashboard
+#         including the type of graph (lines or bars) and the plot
+#         scale (linear or logarithmic).
+#     """
+#
+#     return html.Div([
+#         html.Div(
+#             [
+#                 html.Div(
+#                     [
+#
+#                     ],
+#                     style={"width": "100%"},
+#                 ),
+#             ],
+#             id="graph-settings-container-{}-left".format(graph_type),
+#             className="pretty_container_regional",
+#             style={"display": "flex"},
+#         ),
+#         html.Div(
+#             [
+#                 html.Div([
+#                     html.H6(convida_dict.get('filter_label').get(language),
+#                             className="control_label"),
+#                     dcc.RadioItems(
+#                         id='region_type',
+#                         value="region",
+#                         options=[
+#                             {'value': "spain", 'label': convida_dict.get('spain_label').get(language)},
+#                             {'value': "region", 'label': convida_dict.get('regions_label').get(language)},
+#                             {'value': "prov", 'label': convida_dict.get('provinces_label').get(language)}
+#                         ],
+#                         labelStyle={'display': 'inline-block'},
+#                         style={'padding': '10px 10px 0px 10px'}
+#                     ),
+#                 ],
+#                     style={'display': 'flex'}
+#                 ),
+#                 html.Div([
+#                     html.H6(convida_dict.get('measure_label').get(language),
+#                             className="control_label"),
+#                     dcc.RadioItems(
+#                         id='measure_type',
+#                         value="mean",
+#                         options=[
+#                             {'value': "mean", 'label': convida_dict.get('mean_label').get(language)},
+#                             {'value': "max", 'label': convida_dict.get('max_label').get(language)},
+#                             {'value': "min", 'label': convida_dict.get('min_label').get(language)},
+#                             {'value': "25%", 'label': convida_dict.get('q1_label').get(language)},
+#                             {'value': "50%", 'label': convida_dict.get('median_label').get(language)},
+#                             {'value': "75%", 'label': convida_dict.get('q3_label').get(language)}
+#                         ],
+#                         labelStyle={'display': 'inline-block'},
+#                         style={'padding': '10px 10px 0px 10px'}
+#                     ),
+#                 ],
+#                     style={'display': 'flex'}
+#                 ),
+#                 dcc.Dropdown(
+#                     id="dataitems_map",
+#                     multi=False,
+#                     className="dcc_control",
+#                     placeholder=convida_dict.get('map_dataitems_label').get(language)
+#                 ),
+#             ],
+#             id="graph-settings-container-{}-right".format(graph_type),
+#             className="pretty_container_regional",
+#         ),
+#
+#     ],
+#         id="graph-settings-container-{}".format(graph_type),
+#     )
+
 
 def generate_table_container(language, table_type):
     """Creates and returns the HTML code for the table
@@ -753,94 +1009,111 @@ def generate_table_container(language, table_type):
         legend.
     """
 
-    return html.Div(
-        [
-            html.Div(
-                [html.H6(convida_dict.get('summary_table_label').get(language),
-                         className="control_label")]
-            ),
-            html.Div(
-                [],
-                id="{}-summary-table".format(table_type),
-                style={"display": "flex"},
-            ),
-            html.Div(
-                [
-                    html.Div(
-                        [
-                            dbc.Button(convida_dict.get('save_raw_data_label').get(language),
-                                       id="{}-save-raw-data-button".format(table_type),
-                                       className="button",
-                                       style={"margin-bottom": "20px"},
-                                       n_clicks=0),
-                            dbc.Button(convida_dict.get('save_summary_data_label').get(language),
-                                       id="{}-save-summary-table-button".format(table_type),
-                                       className="button",
-                                       n_clicks=0),
-                        ],
-                        className="one-half column save-buttons",
-                        style={"text-align": "center"},
-                    ),
-                    html.Div(
-                        [
-                            html.Div(
-                                [
-                                    html.H6(convida_dict.get('legend').get(language),
-                                            className="control_label"),
-                                    html.Div(
-                                        [html.Strong("count: "), convida_dict.get('count-meaning').get(language)],
-                                    ),
-                                    html.Div(
-                                        [html.Strong(html.A("mean",
-                                                            href=convida_dict.get('mean-wiki-link').get(language),
-                                                            target="_blank"),
-                                                     ), html.Strong(": "),
-                                         convida_dict.get('mean-meaning').get(language)],
-                                    ),
-                                    html.Div(
-                                        [html.Strong(html.A("std",
-                                                            href=convida_dict.get('std-wiki-link').get(language),
-                                                            target="_blank"),
-                                                     ), html.Strong(": "),
-                                         convida_dict.get('std-meaning').get(language)],
-                                    ),
-                                    html.Div(
-                                        [html.Strong("min: "), convida_dict.get('min-meaning').get(language)],
-                                    ),
-                                    html.Div(
-                                        [html.Strong("25%: "),
-                                         html.A(convida_dict.get('percentile').get(language),
-                                                href=convida_dict.get('percentile-wiki-link').get(language),
-                                                target="_blank"), " 25"],
-                                    ),
-                                    html.Div(
-                                        [html.Strong("50%: "),
-                                         html.A(convida_dict.get('median').get(language),
-                                                href=convida_dict.get('median-wiki-link').get(language),
-                                                target="_blank")],
-                                    ),
-                                    html.Div(
-                                        [html.Strong("75%: "),
-                                         html.A(convida_dict.get('percentile').get(language),
-                                                href=convida_dict.get('percentile-wiki-link').get(language),
-                                                target="_blank"), " 75"],
-                                    ),
-                                    html.Div(
-                                        [html.Strong("max: "), convida_dict.get('max-meaning').get(language)],
-                                    ),
-                                ],
-                                className="summary-table-legend-container",
-                                id="{}-summary-table-legend-container".format(table_type)
-                            ),
-                        ],
-                        className="one-half column",
-                    ),
-                ],
-                className="row container-display",
-            ),
+    return html.Div([
+        html.H6([
+            convida_dict.get('summary_table_label').get(language),
+
+            html.Img(src=dash_app.get_asset_url("img/eye-ena.svg"),
+                     className="eye-icon",
+                     id="summary-eye-icon",
+                     title=convida_dict.get('eye').get(language)),
         ],
-        className="pretty_container",
-        id="{}-summary-table-container".format(table_type),
+            className="control_label",
+            style={"padding-bottom": "5px",
+                   "font-size": "1.8rem"},
+        ),
+        html.Div(
+            [
+                html.Div(
+                    [html.H6(convida_dict.get('summary_table_label').get(language),
+                             className="control_label")]
+                ),
+                html.Div(
+                    [],
+                    id="summary-table",
+                    style={"display": "flex"},
+                ),
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                dbc.Button(convida_dict.get('save_raw_data_label').get(language),
+                                           id="temporal-save-raw-data-button",
+                                           className="button",
+                                           style={"margin-bottom": "20px"},
+                                           n_clicks=0),
+                                dbc.Button(convida_dict.get('save_summary_data_label').get(language),
+                                           id="temporal-save-summary-table-button",
+                                           className="button",
+                                           n_clicks=0),
+                            ],
+                            className="one-half column save-buttons",
+                            style={"text-align": "center"},
+                        ),
+                        html.Div(
+                            [
+                                html.Div(
+                                    [
+                                        html.H6(convida_dict.get('legend').get(language),
+                                                className="control_label"),
+                                        html.Div(
+                                            [html.Strong("count: "), convida_dict.get('count-meaning').get(language)],
+                                        ),
+                                        html.Div(
+                                            [html.Strong(html.A("mean",
+                                                                href=convida_dict.get('mean-wiki-link').get(language),
+                                                                target="_blank"),
+                                                         ), html.Strong(": "),
+                                             convida_dict.get('mean-meaning').get(language)],
+                                        ),
+                                        html.Div(
+                                            [html.Strong(html.A("std",
+                                                                href=convida_dict.get('std-wiki-link').get(language),
+                                                                target="_blank"),
+                                                         ), html.Strong(": "),
+                                             convida_dict.get('std-meaning').get(language)],
+                                        ),
+                                        html.Div(
+                                            [html.Strong("min: "), convida_dict.get('min-meaning').get(language)],
+                                        ),
+                                        html.Div(
+                                            [html.Strong("25%: "),
+                                             html.A(convida_dict.get('percentile').get(language),
+                                                    href=convida_dict.get('percentile-wiki-link').get(language),
+                                                    target="_blank"), " 25"],
+                                        ),
+                                        html.Div(
+                                            [html.Strong("50%: "),
+                                             html.A(convida_dict.get('median').get(language),
+                                                    href=convida_dict.get('median-wiki-link').get(language),
+                                                    target="_blank")],
+                                        ),
+                                        html.Div(
+                                            [html.Strong("75%: "),
+                                             html.A(convida_dict.get('percentile').get(language),
+                                                    href=convida_dict.get('percentile-wiki-link').get(language),
+                                                    target="_blank"), " 75"],
+                                        ),
+                                        html.Div(
+                                            [html.Strong("max: "), convida_dict.get('max-meaning').get(language)],
+                                        ),
+                                    ],
+                                    className="summary-table-legend-container",
+                                    id="summary-table-legend-container".format(table_type)
+                                ),
+                            ],
+                            className="one-half column",
+                        ),
+                    ],
+                    className="row container-display",
+                ),
+            ],
+            className="pretty_container",
+            id="summary-table-container",
+            # style={"display": "none"}
+        ),
+    ],
+        id="summary-table-wrap",
         style={"display": "none"}
     )
 
@@ -866,17 +1139,406 @@ def generate_graph_and_table_containers(language, graph_type):
 
     return html.Div(
         [
-            html.H6(
+            html.H6([
                 convida_dict.get("{}_visualization_label".format(graph_type)).get(language),
+
+                html.Img(src=dash_app.get_asset_url("img/eye-ena.svg"),
+                         className="eye-icon",
+                         id="{}-eye-icon".format(graph_type),
+                         title=convida_dict.get('eye').get(language)),
+            ],
                 className="control_label",
                 style={"padding-bottom": "5px",
                        "font-size": "1.8rem"},
             ),
-            generate_graph_container(language, graph_type),
-            generate_graph_settings_container(language, graph_type),
-            generate_table_container(language, graph_type),
+
+            generate_graph_container(language,
+                                     graph_type) if graph_type == "temporal" else generate_graph_container_with_map(
+                language, graph_type),
+            generate_graph_settings_container(language,
+                                              graph_type) if graph_type == "temporal" else "",
         ],
     )
+
+
+def regions_form(regions):
+    selected_regions_form = []
+    for r in regions:
+        selected_regions_form.append("CA " + r)
+    return selected_regions_form
+
+
+def regions_form_des(regions):
+    selected_regions_form = []
+    for r in regions:
+        selected_regions_form.append(r.replace('CA ', ''))
+    return selected_regions_form
+
+
+@dash_app.callback(
+    [Output("dataitems_map", "options"), Output("dataitems_map", "value")],
+    [Input("selected_covid19", "value"),
+     Input("selected_ine", "value"),
+     Input("selected_mobility", "value"),
+     Input("selected_momo", "value"),
+     Input("selected_aemet", "value")])
+def update_dropdown_map(selected_covid19, selected_ine, selected_mobility, selected_momo, selected_aemet):
+    ine_mod = [i + '*' for i in selected_ine]
+    selected_dataitems = selected_covid19 + ine_mod + selected_mobility + selected_momo + selected_aemet
+    output = [{"label": str(di), "value": str(di)} for di in selected_dataitems]
+    if len(output) != 0:
+        return output, output[-1]['value']
+    return output, dash.no_update
+
+
+@dash_app.callback(
+    [Output("region_type", "value")],
+    [Input('selected_regions', 'value'),
+     Input('selected_provinces', 'value'),
+     Input('select_spain', 'value')],
+    [
+        State("LANG", "data"),
+    ])
+def showby_radioitems(selected_regions, selected_provinces, select_spain, language):
+    if len(selected_regions) > 0 and len(selected_provinces) == 0:
+        return ["region"]
+    elif len(selected_provinces) > 0 and len(selected_regions) == 0:
+        return ["prov"]
+    elif len(selected_regions) == 0 and len(selected_provinces) == 0 and len(select_spain) != 0:
+        return ["spain"]
+    else:
+        return ['']
+
+@dash_app.callback(
+    [Output("dataitems_map_ine", "options"), Output("dataitems_map_ine", "style")],
+    [Input("dataitems_map", "value"), Input('selected_regions', 'value')],
+    [
+        State("LANG", "data"),
+    ])
+def dropdown_ine_map(dataitems_map, selected_regions, language):
+    regions = selected_regions
+    regions_f = regions_form(list(regions))
+    if len(regions_f) != 0 and len(dataitems_map) != 0:
+        if '*' in dataitems_map:
+            dfGeo = convida_server.get_data_items(data_items=[dataitems_map[:-1]],
+                                                  regions=regions_f, language=language)
+
+            if dfGeo.empty:
+                fig = px.choropleth_mapbox(df_region, geojson=region_map, locations='name', color='name_length',
+                                           mapbox_style="carto-positron",
+                                           zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                           opacity=0.5,
+                                           )
+                fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                fig.update_coloraxes(colorbar_title_text="")
+                return [fig]
+
+            dfGeo.reset_index(level=0, inplace=True)
+
+
+            return [{"label": str(di), "value": str(di)} for di in dfGeo.columns[1:]], {'display': 'block'}
+
+        else:
+            return [], {'display': 'none'}
+
+    else:
+        return [], {'display': 'none'}
+
+@dash_app.callback(
+    [Output("map", "figure")],
+    [Input("region_type", "value"),
+     Input("measure_type", "value"),
+     Input("dataitems_map", "value"),
+     Input("dataitems_map", "options"),
+     Input("dataitems_map_ine", "value"),
+     Input('date-picker-range', 'start_date'),
+     Input('date-picker-range', 'end_date'),
+     Input('selected_regions', 'value'),
+     Input('selected_provinces', 'value')],
+    [
+        State("LANG", "data"),
+    ])
+def display_choropleth(region_type, measure_type, dataitems_map, dataitems_map_options, dataitems_map_ine, start_date, end_date,
+                       selected_regions,
+                       selected_provinces, language):
+
+    allcookies = dict(flask.request.cookies)
+
+    if ("convida-dashboard" not in allcookies and len(selected_regions) == 0 and len(selected_provinces) == 0):
+        select_spain = ["España"]
+        if (language == "ES"):
+            region_type = "region"
+            measure_type = "mean"
+            dataitems_map = "Casos diarios"
+            dataitems_map_options = [{'label': 'Casos diarios', 'value': 'Casos diarios'}]
+            selected_regions = ['Andalucía', 'Aragón', 'Principado de Asturias', 'Islas Baleares', 'Canarias',
+                                'Cantabria', 'Castilla-La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta',
+                                'Comunidad Valenciana', 'Extremadura', 'Galicia', 'Comunidad de Madrid', 'Melilla',
+                                'Región de Murcia', 'Comunidad Foral de Navarra', 'País Vasco', 'La Rioja']
+        else:
+            region_type = "region"
+            measure_type = "mean"
+            dataitems_map = "New daily cases"
+            dataitems_map_options = [{'label': 'New daily cases', 'value': 'New daily cases'}]
+            selected_regions = ['Andalucía', 'Aragón', 'Principado de Asturias', 'Islas Baleares', 'Canarias',
+                                'Cantabria', 'Castilla-La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta',
+                                'Comunidad Valenciana', 'Extremadura', 'Galicia', 'Comunidad de Madrid', 'Melilla',
+                                'Región de Murcia', 'Comunidad Foral de Navarra', 'País Vasco', 'La Rioja']
+
+    try:
+        di_opts = [i['value'] for i in dataitems_map_options]
+        if dataitems_map not in di_opts:
+            if len(di_opts) == 1:
+                dataitems_map = di_opts[0]
+            else:
+                dataitems_map = None
+
+        if dataitems_map_options is not None and len(dataitems_map_options) != 0 and dataitems_map is not None and len(
+                dataitems_map) != 0:
+            if region_type == "region" and len(selected_regions) != 0:
+                # regions = [dropdown_option.get("label") for dropdown_option in regions_options]
+                regions = selected_regions
+                regions_f = regions_form(list(regions))
+
+                # Easy implementation
+                if "*" not in dataitems_map:
+
+                    dfQuery = query_data(start_date, end_date, regions_f,
+                                         [dataitems_map],
+                                         [dataitems_map],
+                                         'temporal', language)
+
+                    if dfQuery.empty:
+                        fig = px.choropleth_mapbox(df_region, geojson=region_map, locations='name', color='name_length',
+                                                   mapbox_style="carto-positron",
+                                                   zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                                   opacity=0.5,
+                                                   )
+                        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                        fig.update_coloraxes(colorbar_title_text="")
+                        return [fig]
+
+                    summary_table = dfQuery.describe()
+                    summary_table = summary_table.round(2)
+                    summary_table = summary_table.transpose()
+                    summary_table = summary_table.reset_index()
+                    summary_table = summary_table.rename(columns={'index': ''})
+                    summary_table['Region'] = summary_table['Region'].apply(lambda x: x.replace("CA ", ""))
+
+                    summary_table.rename(columns={measure_type: dataitems_map}, inplace=True)
+
+                    fig = px.choropleth_mapbox(summary_table, geojson=region_map, locations='Region',
+                                               color=dataitems_map,
+                                               mapbox_style="carto-positron", featureidkey="properties.name",
+                                               color_continuous_scale="ylorrd",
+                                               zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                               opacity=0.5,
+                                               )
+                    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                    fig.update_coloraxes(colorbar_title_text="")
+                    return [fig]
+
+
+                else:
+
+                    # Con dfGeo ya devuelve el valor para cada Region
+                    # Region                                                        ...
+                    # CA Andalucía                                          1207.9  ...                           0.0
+                    # CA Aragón                                               98.7  ...                           1.1
+                    dfGeo = convida_server.get_data_items(data_items=[dataitems_map[:-1]],
+                                                          regions=regions_f, language=language)
+
+                    if dfGeo.empty or len(dataitems_map_ine) == 0:
+                        fig = px.choropleth_mapbox(df_region, geojson=region_map, locations='name', color='name_length',
+                                                   mapbox_style="carto-positron",
+                                                   zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                                   opacity=0.5,
+                                                   )
+                        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                        fig.update_coloraxes(colorbar_title_text="")
+                        return [fig]
+
+
+                    dfGeo.reset_index(level=0, inplace=True)
+                    dfGeo['Region'] = dfGeo['Region'].apply(lambda x: x.replace("CA ", ""))
+                    fig = px.choropleth_mapbox(dfGeo, geojson=region_map, locations='Region',
+                                               color=dataitems_map_ine,
+                                               mapbox_style="carto-positron", featureidkey="properties.name",
+                                               color_continuous_scale="ylorrd",
+                                               zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                               opacity=0.5,
+                                               )
+                    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                    fig.update_coloraxes(colorbar_title_text="")
+                    return [fig]
+
+            elif region_type == "prov" and len(selected_provinces) != 0:
+                # provs = [dropdown_option.get("label") for dropdown_option in province_options]
+                provs = selected_provinces
+
+                # Easy implementation
+                if "*" not in dataitems_map:
+                    dfQuery = query_data(start_date, end_date, provs,
+                                         [dataitems_map],
+                                         [dataitems_map],
+                                         'temporal', language)
+                    if dfQuery.empty:
+                        fig = px.choropleth_mapbox(df_region, geojson=region_map, locations='name', color='name_length',
+                                                   mapbox_style="carto-positron",
+                                                   zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                                   opacity=0.5,
+                                                   )
+                        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                        fig.update_coloraxes(colorbar_title_text="")
+                        return [fig]
+                    summary_table = dfQuery.describe()
+                    summary_table = summary_table.round(2)
+                    summary_table = summary_table.transpose()
+                    summary_table = summary_table.reset_index()
+                    summary_table = summary_table.rename(columns={'index': ''})
+                    summary_table['Region'] = summary_table['Region'].apply(lambda x: x.replace("CA ", ""))
+
+                    summary_table.rename(columns={measure_type: dataitems_map}, inplace=True)
+
+                    fig = px.choropleth_mapbox(summary_table, geojson=province_map, locations='Region',
+                                               color=dataitems_map,
+                                               mapbox_style="carto-positron", featureidkey="properties.name",
+                                               color_continuous_scale="ylorrd",
+                                               zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                               opacity=0.5,
+                                               )
+                    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                    fig.update_coloraxes(colorbar_title_text="")
+                    return [fig]
+
+                else:
+
+                    # Region                                                        ...
+                    # CA Andalucía                                          1207.9  ...                           0.0
+                    # CA Aragón                                               98.7  ...                           1.1
+                    dfGeo = convida_server.get_data_items(data_items=[dataitems_map[:-1]],
+                                                          regions=provs, language=language)
+
+                    if dfGeo.empty:
+                        fig = px.choropleth_mapbox(df_region, geojson=region_map, locations='name', color='name_length',
+                                                   mapbox_style="carto-positron",
+                                                   zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                                   opacity=0.5,
+                                                   )
+                        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                        fig.update_coloraxes(colorbar_title_text="")
+                        return [fig]
+
+                    dfGeo.reset_index(level=0, inplace=True)
+                    dfGeo['Region'] = dfGeo['Region'].apply(lambda x: x.replace("CA ", ""))
+
+                    fig = px.choropleth_mapbox(dfGeo, geojson=province_map, locations='Region',
+                                               color=dfGeo.columns.tolist()[1],
+                                               mapbox_style="carto-positron", featureidkey="properties.name",
+                                               color_continuous_scale="ylorrd",
+                                               zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                               opacity=0.5,
+                                               )
+                    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                    fig.update_coloraxes(colorbar_title_text="")
+                    return [fig]
+
+            elif region_type == "spain":
+                # Easy implementation
+                if "*" not in dataitems_map:
+                    dfQuery = query_data(start_date, end_date, ['España'],
+                                         [dataitems_map],
+                                         [dataitems_map],
+                                         'temporal', language)
+                    if dfQuery.empty:
+                        fig = px.choropleth_mapbox(df_region, geojson=region_map, locations='name', color='name_length',
+                                                   mapbox_style="carto-positron",
+                                                   zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                                   opacity=0.5,
+                                                   )
+                        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                        fig.update_coloraxes(colorbar_title_text="")
+                        return [fig]
+
+                    summary_table = dfQuery.describe()
+                    summary_table = summary_table.round(2)
+                    summary_table = summary_table.transpose()
+                    summary_table = summary_table.reset_index()
+                    summary_table = summary_table.rename(columns={'index': ''})
+
+                    summary_table.rename(columns={measure_type: dataitems_map}, inplace=True)
+
+                    fig = px.choropleth_mapbox(summary_table, geojson=europe_map, locations='Region',
+                                               color=dataitems_map,
+                                               mapbox_style="carto-positron", featureidkey="properties.name",
+                                               color_continuous_scale="ylorrd",
+                                               zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                               opacity=0.5,
+                                               )
+                    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                    fig.update_coloraxes(colorbar_title_text="")
+                    return [fig]
+
+                else:
+
+                    # Region                                                        ...
+                    # CA Andalucía                                          1207.9  ...                           0.0
+                    # CA Aragón                                               98.7  ...                           1.1
+                    dfGeo = convida_server.get_data_items(data_items=[dataitems_map[:-1]],
+                                                          regions=['España'], language=language)
+
+                    if dfGeo.empty:
+                        fig = px.choropleth_mapbox(df_region, geojson=region_map, locations='name', color='name_length',
+                                                   mapbox_style="carto-positron",
+                                                   zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                                   opacity=0.5,
+                                                   )
+                        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                        fig.update_coloraxes(colorbar_title_text="")
+                        return [fig]
+
+                    dfGeo.reset_index(level=0, inplace=True)
+                    # dfGeo['Region'] = dfGeo['Region'].apply(lambda x: x.replace("CA ", ""))
+
+                    fig = px.choropleth_mapbox(dfGeo, geojson=europe_map, locations='Region',
+                                               color=dfGeo.columns.tolist()[1],
+                                               mapbox_style="carto-positron", featureidkey="properties.name",
+                                               color_continuous_scale="ylorrd",
+                                               zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                               opacity=0.5,
+                                               )
+                    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                    fig.update_coloraxes(colorbar_title_text="")
+                    return [fig]
+            # empty map
+            else:
+                fig = px.choropleth_mapbox(df_region, geojson=region_map, locations='name', color='name_length',
+                                           mapbox_style="carto-positron",
+                                           zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                           opacity=0.5,
+                                           )
+                fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                fig.update_coloraxes(colorbar_title_text="")
+                return [fig]
+        # empty map
+        else:
+            fig = px.choropleth_mapbox(df_region, geojson=region_map, locations='name', color='name_length',
+                                       mapbox_style="carto-positron",
+                                       zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                       opacity=0.5,
+                                       )
+            fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+            fig.update_coloraxes(colorbar_title_text="")
+            return [fig]
+    except:
+        fig = px.choropleth_mapbox(df_region, geojson=region_map, locations='name', color='name_length',
+                                   mapbox_style="carto-positron",
+                                   zoom=4, center={"lat": 40.463667, "lon": -3.74922},
+                                   opacity=0.5,
+                                   )
+        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+        fig.update_coloraxes(colorbar_title_text="")
+        return [fig]
 
 
 def generate_layout(language):
@@ -912,8 +1574,6 @@ def generate_layout(language):
 
             generate_modal_window('temporal-modal-raw-data-table', language),
             generate_modal_window('temporal-modal-summary-table', language),
-            generate_modal_window('regional-modal-raw-data-table', language),
-            generate_modal_window('regional-modal-summary-table', language),
 
             # empty Div to trigger javascript file for graph resizing
             html.Div(id="output-clientside"),
@@ -925,11 +1585,22 @@ def generate_layout(language):
             generate_graph_and_table_containers(language, "temporal"),
             generate_graph_and_table_containers(language, "regional"),
 
+            generate_table_container(language, "temporal"),
+
             html.Footer(
                 [
-                    html.Div(html.H6(convida_dict.get('footer_1').get(language))),
-                    html.Div(convida_dict.get('footer_2').get(language), style={"display": "inline"}),
-                    html.A("convida@listas.um.es", href="mailto:convida@listas.um.es")
+                    html.Div([
+
+                        html.H6(convida_dict.get('footer_1').get(language), style={"display": "inline"}),
+                        html.A("CyberDataLab", href="https://cyberdatalab.um.es/", style={"display": "inline"}),
+                        html.H6(convida_dict.get('footer_1_1').get(language), style={"display": "inline"}),
+
+                    ], style={"display": "inline"}),
+
+                    html.Div([convida_dict.get('footer_2').get(language),
+                              html.A("convida@listas.um.es", href="mailto:convida@listas.um.es",
+                                     style={"display": "inline"})]),
+
                 ],
                 className="convida_footer",
             )
@@ -948,12 +1619,24 @@ dash_app.layout = html.Div(generate_layout('ES'), id="convida_main_container")
     [State("LANG", "data")],
 )
 def set_language(n_clicks_es, n_clicks_en, search, lang):
+    allcookies = dict(flask.request.cookies)
     if search and not n_clicks_en and not n_clicks_es:
         state = parse_url(search)
         if 'language' in state.keys() and lang == state['language'][0] and state['language'][0] == 'ES':
             raise PreventUpdate
         elif 'language' in state.keys():
             return state.get('language', '')[0], generate_layout(state.get('language', '')[0])
+    elif "convida-dashboard" in allcookies and not n_clicks_en and not n_clicks_es:
+        myCookie = allcookies["convida-dashboard"]
+        dic = json.loads(myCookie)
+        if 'language' in dic.keys() and lang == dic['language'][0] and dic['language'][0] == 'ES':
+            raise PreventUpdate
+        elif 'language' in dic.keys():
+            return dic.get('language'), generate_layout(dic.get('language'))
+
+    # Reset cookie
+    dash.callback_context.response.set_cookie('convida-dashboard', '', expires=0)
+
     if n_clicks_en == 1:
         return 'EN', generate_layout('EN')
     return 'ES', generate_layout('ES')
@@ -990,6 +1673,8 @@ def parse_url(url):
                     Output('further-data-sources', 'value'), Output('select_spain', 'value')],
                    [Input('url', 'search')])
 def share_url(search):
+    allcookies = dict(flask.request.cookies)
+
     if search:
         state = parse_url(search)
         aux = []
@@ -1006,8 +1691,76 @@ def share_url(search):
             elif 'select_spain' in i:
                 spain_box.append(state[i][0])
         return state.get('start_date', '')[0], state.get('end_date', '')[0], aux, spain_box
+    elif "convida-dashboard" in allcookies:
+        myCookie = allcookies["convida-dashboard"]
+        dic = json.loads(myCookie)
+        copy = dic.copy()
+        for i in dic:
+            if (not dic[i]):
+                copy.pop(i)
+        aux = []
+        spain_box = []
+        for i in copy.keys():
+            if 'ine' in i:
+                aux.append('ine')
+            elif 'mobility' in i:
+                aux.append('mobility')
+            elif 'momo' in i:
+                aux.append('momo')
+            elif 'aemet' in i:
+                aux.append('aemet')
+            elif 'select_spain' in i:
+                spain_box.append(copy[i][0])
+
+        return copy.get('start_date'), copy.get('end_date'), aux, spain_box
     else:
         return str(dt(2020, 2, 21))[0:10], convida_server.get_max_date(), [], []
+
+
+@dash_app.callback(
+    [Output("temporal-eye-icon", "src"), Output("temporal-graph-container", "style"),
+     Output("graph-settings-container-temporal", "style")],
+    [Input("temporal-eye-icon", "n_clicks")],
+)
+def select_temporal_eye_icon(n_clicks):
+    input_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+    if input_id == 'temporal-eye-icon':
+        if n_clicks % 2 == 0:
+            return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {'display': 'flex'}
+        else:
+            return dash_app.get_asset_url("img/eye-dis.svg"), {'display': 'none'}, {'display': 'none'}
+    else:
+        return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}, {'display': 'flex'}
+
+
+@dash_app.callback(
+    [Output("regional-eye-icon", "src"), Output("regional-wrap-container", "style")],
+    [Input("regional-eye-icon", "n_clicks")],
+)
+def select_regional_eye_icon(n_clicks):
+    input_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+    if input_id == 'regional-eye-icon':
+        if n_clicks % 2 == 0:
+            return dash_app.get_asset_url("img/eye-ena.svg"), {"display": "flex"}
+        else:
+            return dash_app.get_asset_url("img/eye-dis.svg"), {'display': 'none'}
+    else:
+        return dash_app.get_asset_url("img/eye-ena.svg"), {"display": "flex"}
+
+
+@dash_app.callback(
+    [Output("summary-eye-icon", "src"), Output("summary-table-container", "style")],
+    [Input("summary-eye-icon", "n_clicks")],
+)
+def select_summary_eye_icon(n_clicks):
+    input_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+    if input_id == 'summary-eye-icon':
+        if n_clicks % 2 == 0:
+            return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}
+        else:
+            return dash_app.get_asset_url("img/eye-dis.svg"), {'display': 'none'}
+    else:
+        return dash_app.get_asset_url("img/eye-ena.svg"), {'display': 'block'}
 
 
 @dash_app.callback(
@@ -1016,6 +1769,7 @@ def share_url(search):
 )
 def select_all_regions(n_clicks, search):
     input_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+    allcookies = dict(flask.request.cookies)
     if input_id == 'select_all_regions_button':
         if n_clicks > 0:
             return [dropdown_option.get("label") for dropdown_option in regions_options]
@@ -1026,6 +1780,13 @@ def select_all_regions(n_clicks, search):
             return state.get('selected_regions', '')[0].split(",")
         else:
             return []
+    elif "convida-dashboard" in allcookies:
+        myCookie = allcookies["convida-dashboard"]
+        dic = json.loads(myCookie)
+        if 'selected_regions' in dic:
+            return dic.get('selected_regions', '')
+        else:
+            return []
     else:
         return []
 
@@ -1034,8 +1795,9 @@ def select_all_regions(n_clicks, search):
     Output("selected_provinces", "value"),
     [Input("select_all_provinces_button", "n_clicks"), Input('url', 'search')],
 )
-def select_all_regions(n_clicks, search):
+def select_all_provinces(n_clicks, search):
     input_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+    allcookies = dict(flask.request.cookies)
     if input_id == 'select_all_provinces_button':
         if n_clicks > 0:
             return [dropdown_option.get("label") for dropdown_option in province_options]
@@ -1046,12 +1808,20 @@ def select_all_regions(n_clicks, search):
             return state.get('selected_provinces', '')[0].split(",")
         else:
             return []
+    elif "convida-dashboard" in allcookies:
+        myCookie = allcookies["convida-dashboard"]
+        dic = json.loads(myCookie)
+        if 'selected_provinces' in dic:
+            return dic.get('selected_provinces', '')
+        else:
+            return []
     else:
         return []
 
 
 def select_all_data_items(n_clicks, search, dropdown_options, dataSource):
     input_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+    allcookies = dict(flask.request.cookies)
     if input_id in ['select_all_{}_button'.format(i) for i in ['covid19', 'mobility', 'ine', 'momo', 'aemet']]:
         if n_clicks > 0:
             return [dropdown_option.get("label") for dropdown_option in dropdown_options[dataSource]]
@@ -1076,6 +1846,15 @@ def select_all_data_items(n_clicks, search, dropdown_options, dataSource):
                 if all(elem in dropdown_option for elem in sel_data):
                     aux.extend(sel_data)
         return aux
+    elif "convida-dashboard" in allcookies:
+        myCookie = allcookies["convida-dashboard"]
+        dic = json.loads(myCookie)
+        for i in dic.keys():
+            if i == 'selected_{}'.format(dataSource.lower()):
+                if len(dic[i]) != 0:
+                    return dic[i]
+                else:
+                    return []
     else:
         return []
 
@@ -1138,76 +1917,59 @@ def toggle_further_data_sources(selected_further_data_sources, search):
     return output
 
 
-def regions_form(regions):
-    selected_regions_form = []
-    for r in regions:
-        selected_regions_form.append("CA " + r)
-    return selected_regions_form
-
-
-def update_graph_and_table(start_date, end_date,
-                           selected_regions, selected_provinces, select_spain, selected_covid19,
-                           selected_ine, selected_mobility,
-                           selected_momo, selected_aemet,
-                           selected_graph_type,
-                           selected_plot_scale,
-                           language,
-                           analysis_type):
-    """Updates graph and table given the specified query parameters.
-
-    Given the specified query parameters it retrieves the corresponding
-    data items, plots them in the graph, and displays them in the
-    summary table.
-
-    Parameters
-    ----------
-    start_date : str
-        The start date for the time window of queried data
-    end_date : str
-        The end date for the time window of queried data
-    selected_regions : list
-        The list of regions (as str) for which to query data
-    selected_covid19 : list
-        The list of data items to query from the COVID19 data source
-    selected_ine : list
-        The list of data items to query from the INE data source
-    selected_mobility : list
-        The list of data items to query from the Mobility data source
-    selected_momo : list
-        The list of data items to query from the MoMo data source
-    selected_aemet : list
-        The list of data items to query from the AEMET data source
-    selected_graph_type : str
-        The selected type of graph to be plotted (e.g., 'lines' or 'bars`)
-    selected_plot_scale : str
-        The selected scale of the graph to be plotted (e.g., 'linear'
-        or 'logarithmic`)
-    language : str
-        The language to be used (e.g., 'ES' or 'EN')
-    analysis_type : str
-        The type of visualization for the graph (e.g., 'temporal' or
-        'regional')
-
-    Returns
-    -------
-    dict
-        a dict with the figure data and its layout
-    DataTable
-        a Dash DataTable containing the queried data
-    CSS style
-        table container CSS style ('none' or 'block')
-    list
-        the list of query parameters to be stored in a Dash Store
-    """
+@dash_app.callback(
+    [
+        Output("share_temporal", "data"),
+        Output("temporal_graph", "figure"),
+        Output("summary-table", "children"),
+        Output("summary-table-wrap", "style"),
+        Output("temporal_query_params", "data"),
+    ],
+    [
+        Input('date-picker-range', 'start_date'),
+        Input('date-picker-range', 'end_date'),
+        Input("selected_regions", "value"),
+        Input("selected_provinces", "value"),
+        Input("select_spain", "value"),
+        Input("selected_covid19", "value"),
+        Input("selected_ine", "value"),
+        Input("selected_mobility", "value"),
+        Input("selected_momo", "value"),
+        Input("selected_aemet", "value"),
+        Input("temporal_selected_graph_type", "value"),
+        Input("temporal_selected_plot_scale", "value"),
+    ],
+    [
+        State("LANG", "data"),
+        State("share_temporal", "data"),
+    ]
+)
+def temporal_update_graph_and_table(start_date, end_date,
+                                    selected_regions, selected_provinces, select_spain, selected_covid19,
+                                    selected_ine, selected_mobility,
+                                    selected_momo, selected_aemet,
+                                    selected_graph_type,
+                                    selected_plot_scale,
+                                    language,
+                                    cookies):
     # print(f'{start_date} {end_date} {selected_regions} {selected_covid19} {language}')
     params = locals()
+    allcookies = dict(flask.request.cookies)
+
+    if ("convida-dashboard" not in allcookies and len(selected_regions) == 0 and len(selected_provinces) == 0):
+        select_spain = ["España"]
+        if (language == "ES"):
+            selected_covid19 = ['Casos diarios']
+        else:
+            selected_covid19 = ['New daily cases']
+    analysis_type = "temporal"
     layout_graph = copy.deepcopy(empty_graph_layout)
     selected_temporal_data_items = selected_covid19 + selected_mobility + selected_momo + selected_aemet
     selected_data_items = selected_temporal_data_items + selected_ine
     # No data to plot
     if ((len(selected_regions) == 0) and (len(selected_provinces) == 0) and (not select_spain) or (
             len(selected_data_items) == 0) or
-            ((len(selected_temporal_data_items) == 0) and (analysis_type == 'temporal'))):
+            (len(selected_temporal_data_items) == 0)):
         if len(selected_regions) == 0 and len(selected_provinces) == 0 and not select_spain:
             empty_graph_annotation['text'] = convida_dict.get('no_regions_selected_label').get(language)
         elif len(selected_data_items) == 0:
@@ -1221,13 +1983,27 @@ def update_graph_and_table(start_date, end_date,
         output = [params, figure, [], {"display": "none"}, []]
         return output
 
+    if (cookies):
+        cookies.pop("cookies")
+        cookies["selected_regions"] = selected_regions
+        cookies["selected_provinces"] = selected_provinces
+        cookies["select_spain"] = select_spain
+        cookies["selected_covid19"] = selected_covid19
+        cookies["selected_ine"] = selected_ine
+        cookies["selected_mobility"] = selected_mobility
+        cookies["selected_momo"] = selected_momo
+        cookies["selected_aemet"] = selected_aemet
+
+        string = json.dumps(cookies)
+        dash.callback_context.response.set_cookie('convida-dashboard', string, max_age=86400)
+
     layout_graph["dragmode"] = "select"
     layout_graph["showlegend"] = True
     layout_graph["autosize"] = True
 
     layout_graph["yaxis"]["type"] = 'linear' if selected_plot_scale == 'Linear' else 'log'
     graph_type = "scatter" if selected_graph_type == 'lines' else "bar"
-    logging = True if analysis_type == 'temporal' else False  # To avoid double logging
+    logging = True
 
     if select_spain:
         selected_regions_provinces = regions_form(list(selected_regions)) + list(selected_provinces) + select_spain
@@ -1237,7 +2013,7 @@ def update_graph_and_table(start_date, end_date,
     dfQuery = query_data(start_date, end_date, selected_regions_provinces,
                          selected_temporal_data_items,
                          selected_ine,
-                         analysis_type, language, logging)
+                         'temporal', language, logging)
     data = []
     for column in list(dfQuery.columns.values):
         data.append(
@@ -1274,6 +2050,7 @@ def update_graph_and_table(start_date, end_date,
         empty_graph_annotation['text'] = convida_dict.get('no_available_data_label').get(language)
         layout_graph["annotations"] = [empty_graph_annotation]
         figure = dict(data=[], layout=layout_graph)
+
         output = [params, figure, [], {"display": "none"}, []]
 
         return output
@@ -1287,33 +2064,88 @@ def update_graph_and_table(start_date, end_date,
     return output
 
 
-for analysis_type in ('temporal', 'regional'):
-    dash_app.callback(
-        [
-            Output("share_{}".format(analysis_type), "data"),
-            Output("{}_graph".format(analysis_type), "figure"),
-            Output("{}-summary-table".format(analysis_type), "children"),
-            Output("{}-summary-table-container".format(analysis_type), "style"),
-            Output("{}_query_params".format(analysis_type), "data"),
-        ],
-        [
-            Input('date-picker-range', 'start_date'),
-            Input('date-picker-range', 'end_date'),
-            Input("selected_regions", "value"),
-            Input("selected_provinces", "value"),
-            Input("select_spain", "value"),
-            Input("selected_covid19", "value"),
-            Input("selected_ine", "value"),
-            Input("selected_mobility", "value"),
-            Input("selected_momo", "value"),
-            Input("selected_aemet", "value"),
-            Input("{}_selected_graph_type".format(analysis_type), "value"),
-            Input("{}_selected_plot_scale".format(analysis_type), "value"),
-        ],
-        [
-            State("LANG", "data"),
-        ]
-    )(partial(update_graph_and_table, analysis_type=analysis_type))
+@dash_app.callback(
+    [
+        Output("share_regional", "data"),
+        Output("regional_graph", "figure"),
+        Output("regional_query_params", "data"),
+    ],
+    [
+        Input('date-picker-range', 'start_date'),
+        Input('date-picker-range', 'end_date'),
+        Input("selected_regions", "value"),
+        Input("selected_provinces", "value"),
+        Input("select_spain", "value"),
+        Input("selected_covid19", "value"),
+        Input("selected_ine", "value"),
+        Input("selected_mobility", "value"),
+        Input("selected_momo", "value"),
+        Input("selected_aemet", "value"),
+    ],
+    [
+        State("LANG", "data"),
+    ]
+)
+def regional_update_graph_and_table(start_date, end_date,
+                                    selected_regions, selected_provinces, select_spain, selected_covid19,
+                                    selected_ine, selected_mobility,
+                                    selected_momo, selected_aemet,
+                                    language):
+    # print(f'{start_date} {end_date} {selected_regions} {selected_covid19} {language}')
+    params = locals()
+    allcookies = dict(flask.request.cookies)
+
+    if ("convida-dashboard" not in allcookies and len(selected_regions) == 0 and len(selected_provinces) == 0):
+        select_spain = ["España"]
+        if (language == "ES"):
+            selected_covid19 = ['Casos diarios']
+        else:
+            selected_covid19 = ['New daily cases']
+    layout_graph = copy.deepcopy(empty_graph_layout)
+    selected_temporal_data_items = selected_covid19 + selected_mobility + selected_momo + selected_aemet
+    selected_data_items = selected_temporal_data_items + selected_ine
+    # No data to plot
+    if ((len(selected_regions) == 0) and (len(selected_provinces) == 0) and (not select_spain) or (
+            len(selected_data_items) == 0)):
+        if len(selected_regions) == 0 and len(selected_provinces) == 0 and not select_spain:
+            empty_graph_annotation['text'] = convida_dict.get('no_regions_selected_label').get(language)
+        elif len(selected_data_items) == 0:
+            empty_graph_annotation['text'] = convida_dict.get('no_data_selected_label').get(language)
+        elif len(selected_temporal_data_items) == 0:
+            empty_graph_annotation['text'] = convida_dict.get('no_temporal_data_selected_label').get(language)
+
+        layout_graph["annotations"] = [empty_graph_annotation]
+
+        figure = dict(data=[], layout=layout_graph)
+        output = [params, figure, []]
+        return output
+
+    logging = False  # To avoid double logging
+
+    if select_spain:
+        selected_regions_provinces = regions_form(list(selected_regions)) + list(selected_provinces) + select_spain
+    else:
+        selected_regions_provinces = regions_form(list(selected_regions)) + list(selected_provinces)
+
+    dfQuery = query_data(start_date, end_date, selected_regions_provinces,
+                         selected_temporal_data_items,
+                         selected_ine,
+                         'regional', language, logging)
+
+    if not dfQuery.empty:
+        b = dfQuery.unstack(level=0).reset_index(level=2, drop=True).reset_index(name='Dataitems')
+        b.dropna()
+        b['Region'] = regions_form_des(b['Region'])
+        fig = px.box(b, x="Region", y="Dataitems", color="Item")
+        fig.update_traces(quartilemethod="exclusive", boxmean=True)
+        fig.update_layout(legend=dict(yanchor="top", y=0.99, orientation="h"))
+    else:
+        fig = None
+
+    output = [params, fig,
+              [start_date, end_date, selected_regions_provinces,
+               selected_temporal_data_items, selected_ine]]
+    return output
 
 
 def query_data(start_date, end_date, selected_regions,
@@ -1360,16 +2192,24 @@ def query_data(start_date, end_date, selected_regions,
     if analysis_type == "temporal":
         dfQuery = dfTemp
     else:
-        if len(selected_temporal_data_items) > 0:
-            # Convert temporal data to geographical data by keeping the mean values
-            dfTemp = dfTemp.mean(axis='index').unstack()
-
         dfGeo = pd.DataFrame()
         if len(selected_geographical_data_items) > 0:
             dfGeo = convida_server.get_data_items(data_items=selected_geographical_data_items,
                                                   regions=selected_regions, language=language)
 
-        dfQuery = pd.concat([dfTemp, dfGeo], axis=1)
+        index = []
+        if len(selected_geographical_data_items) > 0 and len(selected_temporal_data_items) == 0:
+            for region in dfGeo.index:
+                for item in dfGeo.columns:
+                    index.append([region, item])
+                    multiIndex = pd.MultiIndex.from_tuples(index, names=["Region", "Item"])
+                    dfTemp = pd.DataFrame(index=["date"], columns=multiIndex)
+
+        for region in dfGeo.index:
+            for item in dfGeo.columns:
+                dfTemp[region, item] = dfGeo[item][region]
+
+        dfQuery = dfTemp
 
     if logging:
         query = dict()
@@ -1415,7 +2255,6 @@ def get_summary_table(dfQuery) -> dash_table.DataTable:
     summary_table = summary_table.transpose()
     summary_table = summary_table.reset_index()
     summary_table = summary_table.rename(columns={'index': ''})
-
     edit_sum = summary_table.to_dict('records')
     for i, val in enumerate(edit_sum):
         if "Region" in edit_sum[i].keys():
@@ -1508,7 +2347,7 @@ def toggle_modal_save_raw_data(n1, n2, is_open, query_params, language, table_ty
     return not is_open, [create_download_buttons(uriCSV, uriHTML, uriJSON, uriXML, language)]
 
 
-for table_type in ("temporal", "regional"):
+for table_type in ["temporal"]:
     dash_app.callback(
         [Output("{}-modal-raw-data-table".format(table_type), "is_open"),
          Output("download-area-{}-modal-raw-data-table".format(table_type), "children")],
@@ -1575,7 +2414,7 @@ def toggle_modal_save_summary_table(n1, n2, is_open, query_params, language, tab
     return not is_open, [create_download_buttons(uriCSV, uriHTML, uriJSON, uriXML, language)]
 
 
-for table_type in ("temporal", "regional"):
+for table_type in ["temporal"]:
     dash_app.callback(
         [Output("{}-modal-summary-table".format(table_type), "is_open"),
          Output("download-area-{}-modal-summary-table".format(table_type), "children")],

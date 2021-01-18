@@ -36,12 +36,48 @@
     "EN": "Add Spain"
   },
   "regions_label": {
-    "ES": "Regiones",
-    "EN": "Regions"
+    "ES": "Comunidades Autónomas",
+    "EN": "Autonomous Communities"
   },
   "provinces_label": {
     "ES": "Provincias",
     "EN": "Provinces"
+  },
+  "filter_label": {
+    "ES": "Mostrar por:",
+    "EN": "Show by:"
+  },
+  "measure_label": {
+    "ES": "Medida:",
+    "EN": "Measure:"
+  },
+  "mean_label": {
+    "ES": "media",
+    "EN": "mean"
+  },
+  "max_label": {
+    "ES": "límite superior",
+    "EN": "upper limit"
+  },
+  "min_label": {
+    "ES": "límite inferior",
+    "EN": "lower limit"
+  },
+  "q1_label": {
+    "ES": "percentil 25",
+    "EN": "percentile 25"
+  },
+  "median_label": {
+    "ES": "mediana",
+    "EN": "median"
+  },
+  "q3_label": {
+    "ES": "percentil 75",
+    "EN": "percentile 75"
+  },
+  "spain_label": {
+    "ES": "España",
+    "EN": "Spain"
   },
   "covid19_data_label": {
     "ES": "Datos de COVID19",
@@ -123,6 +159,10 @@
     "ES": "Compartir",
     "EN": "Share"
   },
+  "eye": {
+    "ES": "Mostrar/Ocultar",
+    "EN": "Show/Hide"
+  },
   "temporal_visualization_label": {
     "ES": "Visualización temporal",
     "EN": "Temporal visualization"
@@ -191,6 +231,14 @@
     "ES": "Tabla resumen",
     "EN": "Summary table"
   },
+  "map_dataitems_label": {
+    "ES": "Datos seleccionados",
+    "EN": "Selected data"
+  },
+  "select_type_dataitem": {
+    "ES": "Selecciona el dataitem a mostrar",
+    "EN": "Select the dataitem to display"
+  },
   "legend": {
     "ES": "Leyenda",
     "EN": "Legend"
@@ -240,8 +288,12 @@
     "EN": "https://en.wikipedia.org/wiki/Median"
   },
   "footer_1": {
-    "ES": "Proyecto desarrollado por el CyberDataLab de la Universidad de Murcia",
-    "EN": "Project developed by the CyberDataLab at the University of Murcia (Spain)"
+    "ES": "Proyecto desarrollado por el ",
+    "EN": "Project developed by the "
+  },
+  "footer_1_1": {
+    "ES": " de la Universidad de Murcia",
+    "EN": " at the University of Murcia (Spain)"
   },
   "footer_2": {
     "ES": "Contacte con nosotros a través de ",

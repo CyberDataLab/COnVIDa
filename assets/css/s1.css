@@ -58,7 +58,7 @@
 }
 
 /* For devices larger than 550px --- 780px */
-@media (min-width: 1000px) {
+@media (min-width: 1350px) {
   .container {
     width: 80%;
   }
@@ -107,10 +107,14 @@
   }
 
   .one-third.column {
-    width: 30.6666666667%;
+    width: 36.6666666667%;
     text-align: center;
     padding: 10px;
   }
+  #cyber-umu-logos{
+    width: 50%;
+  }
+
   .two-thirds.column {
     width: 65.3333333333%;
   }
@@ -550,7 +554,7 @@ there.
 }
 
 /* Larger than phablet (also point when grid becomes active), screen larger than 550px */
-@media (min-width: 1000px) {
+@media (min-width: 1350px) {
   /* 8% default */
   .one.column,
   .one.columns {
@@ -578,7 +582,7 @@ there.
 }
 
 /* Larger than tablet, for screens smaller than 768px */
-@media (max-width: 1000px) {
+@media (max-width: 1350px) {
   .flex-display {
     display: block !important;
   }
@@ -588,6 +592,12 @@ there.
   .pretty_container {
     margin: 0 !important;
     margin-bottom: 25px !important;
+  }
+  #cyberdatalab-a {
+    margin-right: 20px;
+  }
+  #umu-a {
+    margin-left: 20px;
   }
   .container-display {
     display: flex;
@@ -633,6 +643,22 @@ there.
     margin-bottom: 20px;
   }
 
+  #regional-wrap-container {
+    display: block !important;
+  }
+  .pretty_container.graph {
+    width: 100% !important;
+  }
+  .pretty_container.map {
+    width: 100% !important;
+  }
+  #graph-settings-container-regional-left {
+    display: none !important;
+  }
+  #graph-settings-container-regional-right {
+    width: 100% !important;
+  }
+
 }
 
 @media (max-width: 810px) {
@@ -643,7 +669,7 @@ there.
 }
 
 /* Larger than desktop */
-@media (min-width: 1000px) {
+@media (min-width: 1350px) {
 }
 
 /* Larger than Desktop HD */

@@ -18,7 +18,7 @@ body {
 #last_update {
     float:right;
     margin-right: 20px;
-    margin-top: 8px;
+    margin-top: 13px;
 }
 #last_update h6 {
     font-size: small;
@@ -26,7 +26,7 @@ body {
 }
 .lang_button, .help_button {
     float: right;
-    height: 25px;
+    height: 30px;
     margin: 5px 10px 10px 0px;
     cursor: pointer;
 }
@@ -38,6 +38,21 @@ body {
     padding: 15px;
     position: relative;
     box-shadow: 2px 2px 2px lightgrey;
+}
+
+.pretty_container.graph {
+    width: 48%;
+}
+.pretty_container.map {
+    width: 48%;
+}
+
+.pretty_container_regional {
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    margin: 3px 10px 10px 10px;
+    padding: 15px;
+    position: relative;
 }
 
 .bare_container {
@@ -57,8 +72,14 @@ body {
 
 .control_label {
     padding: 10px 10px 0px 10px;
-    width: calc(100% - 40px);
+    /*width: calc(100% - 40px);*/
     font-weight: bold;
+}
+
+.eye-icon {
+    height: 15px;
+    margin-left: 10px;
+    cursor: pointer;
 }
 
 .rc-slider {
@@ -257,6 +278,10 @@ body {
 .dash-table-container .dash-spreadsheet-container .dash-spreadsheet-inner td.focused {
 }
 
+.dash-dropdown {
+    line-height: 1;
+}
+
 #button_show_more {
     float: right;
     text-transform: none;
@@ -283,4 +308,12 @@ body {
     /*text-align: left !important;*/
     border: 1px solid #e4e4e4;
     border-radius: 5px;
+}
+
+#map {
+    margin-left: 10px;
+}
+
+#regional_graph {
+    margin-right: 10px;
 }
