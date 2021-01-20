@@ -747,6 +747,31 @@ def generate_graph_container_with_map(language, graph_type):
                     ],
                     type="circle",
                 ),
+                html.Div(
+                    [
+                        html.Div([
+                            html.H6(convida_dict.get('plot_scale_label').get(language) + ':',
+                                    className="control_label"),
+                            dcc.RadioItems(
+                                id="{}_selected_plot_scale".format(graph_type),
+                                value="Linear",
+                                options=[
+                                    {"label": convida_dict.get('plot_scale_linear_label').get(language),
+                                     "value": "Linear"},
+                                    {"label": convida_dict.get('plot_scale_log_label').get(language),
+                                     "value": "Log"},
+                                ],
+                                labelStyle={"display": "inline-block"},
+                                style={'padding': '10px 10px 0px 10px', 'width': 'auto'},
+                                className="dcc_control",
+                            ),
+                        ],
+                            style={"display": "flex"}
+                        )
+                    ],
+                    id="graph-settings-container-{}-left".format(graph_type),
+                    className="pretty_container_regional",
+                ),
             ],
             id="{}-graph-container".format(graph_type),
             className="pretty_container graph",
@@ -898,95 +923,6 @@ def generate_graph_settings_container(language, graph_type):
         className="pretty_container",
         style={"display": "flex"},
     )
-
-#
-# def generate_graph_settings_container_with_map(language, graph_type):
-#     """Creates and returns the HTML code for the graph settings
-#     container of the dashboard.
-#
-#     Parameters
-#     ----------
-#     language : str
-#         The language to be used (e.g., 'ES' or 'EN')
-#     graph_type : str
-#         The type of graph whose settings are to be generated
-#         (e.g., 'temporal' or 'regional')
-#
-#     Returns
-#     -------
-#     html
-#         HTML code for the graph settings container of the dashboard
-#         including the type of graph (lines or bars) and the plot
-#         scale (linear or logarithmic).
-#     """
-#
-#     return html.Div([
-#         html.Div(
-#             [
-#                 html.Div(
-#                     [
-#
-#                     ],
-#                     style={"width": "100%"},
-#                 ),
-#             ],
-#             id="graph-settings-container-{}-left".format(graph_type),
-#             className="pretty_container_regional",
-#             style={"display": "flex"},
-#         ),
-#         html.Div(
-#             [
-#                 html.Div([
-#                     html.H6(convida_dict.get('filter_label').get(language),
-#                             className="control_label"),
-#                     dcc.RadioItems(
-#                         id='region_type',
-#                         value="region",
-#                         options=[
-#                             {'value': "spain", 'label': convida_dict.get('spain_label').get(language)},
-#                             {'value': "region", 'label': convida_dict.get('regions_label').get(language)},
-#                             {'value': "prov", 'label': convida_dict.get('provinces_label').get(language)}
-#                         ],
-#                         labelStyle={'display': 'inline-block'},
-#                         style={'padding': '10px 10px 0px 10px'}
-#                     ),
-#                 ],
-#                     style={'display': 'flex'}
-#                 ),
-#                 html.Div([
-#                     html.H6(convida_dict.get('measure_label').get(language),
-#                             className="control_label"),
-#                     dcc.RadioItems(
-#                         id='measure_type',
-#                         value="mean",
-#                         options=[
-#                             {'value': "mean", 'label': convida_dict.get('mean_label').get(language)},
-#                             {'value': "max", 'label': convida_dict.get('max_label').get(language)},
-#                             {'value': "min", 'label': convida_dict.get('min_label').get(language)},
-#                             {'value': "25%", 'label': convida_dict.get('q1_label').get(language)},
-#                             {'value': "50%", 'label': convida_dict.get('median_label').get(language)},
-#                             {'value': "75%", 'label': convida_dict.get('q3_label').get(language)}
-#                         ],
-#                         labelStyle={'display': 'inline-block'},
-#                         style={'padding': '10px 10px 0px 10px'}
-#                     ),
-#                 ],
-#                     style={'display': 'flex'}
-#                 ),
-#                 dcc.Dropdown(
-#                     id="dataitems_map",
-#                     multi=False,
-#                     className="dcc_control",
-#                     placeholder=convida_dict.get('map_dataitems_label').get(language)
-#                 ),
-#             ],
-#             id="graph-settings-container-{}-right".format(graph_type),
-#             className="pretty_container_regional",
-#         ),
-#
-#     ],
-#         id="graph-settings-container-{}".format(graph_type),
-#     )
 
 
 def generate_table_container(language, table_type):
@@ -1209,6 +1145,7 @@ def showby_radioitems(selected_regions, selected_provinces, select_spain, langua
     else:
         return ['']
 
+
 @dash_app.callback(
     [Output("dataitems_map_ine", "options"), Output("dataitems_map_ine", "style")],
     [Input("dataitems_map", "value"), Input('selected_regions', 'value')],
@@ -1235,7 +1172,6 @@ def dropdown_ine_map(dataitems_map, selected_regions, language):
 
             dfGeo.reset_index(level=0, inplace=True)
 
-
             return [{"label": str(di), "value": str(di)} for di in dfGeo.columns[1:]], {'display': 'block'}
 
         else:
@@ -1243,6 +1179,7 @@ def dropdown_ine_map(dataitems_map, selected_regions, language):
 
     else:
         return [], {'display': 'none'}
+
 
 @dash_app.callback(
     [Output("map", "figure")],
@@ -1259,13 +1196,14 @@ def dropdown_ine_map(dataitems_map, selected_regions, language):
     [
         State("LANG", "data"),
     ])
-def display_choropleth(region_type, measure_type, dataitems_map, dataitems_map_options, dataitems_map_ine, start_date, end_date,
+def display_choropleth(region_type, measure_type, dataitems_map, dataitems_map_options, dataitems_map_ine, start_date,
+                       end_date,
                        selected_regions,
                        selected_provinces, select_spain, language):
-
     allcookies = dict(flask.request.cookies)
 
-    if ("convida-dashboard" not in allcookies and len(selected_regions) == 0 and len(selected_provinces) == 0 and len(select_spain) == 0):
+    if ("convida-dashboard" not in allcookies and len(selected_regions) == 0 and len(selected_provinces) == 0 and len(
+            select_spain) == 0):
         select_spain = ["España"]
         if (language == "ES"):
             region_type = "region"
@@ -1358,7 +1296,6 @@ def display_choropleth(region_type, measure_type, dataitems_map, dataitems_map_o
                         fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
                         fig.update_coloraxes(colorbar_title_text="")
                         return [fig]
-
 
                     dfGeo.reset_index(level=0, inplace=True)
                     dfGeo['Region'] = dfGeo['Region'].apply(lambda x: x.replace("CA ", ""))
@@ -1957,7 +1894,8 @@ def temporal_update_graph_and_table(start_date, end_date,
     params = locals()
     allcookies = dict(flask.request.cookies)
 
-    if ("convida-dashboard" not in allcookies and len(selected_regions) == 0 and len(selected_provinces) == 0 and len(select_spain) == 0):
+    if ("convida-dashboard" not in allcookies and len(selected_regions) == 0 and len(selected_provinces) == 0 and len(
+            select_spain) == 0):
         select_spain = ["España"]
         if (language == "ES"):
             selected_covid19 = ['Casos diarios']
@@ -2082,6 +2020,7 @@ def temporal_update_graph_and_table(start_date, end_date,
         Input("selected_mobility", "value"),
         Input("selected_momo", "value"),
         Input("selected_aemet", "value"),
+        Input("regional_selected_plot_scale", "value"),
     ],
     [
         State("LANG", "data"),
@@ -2091,14 +2030,15 @@ def temporal_update_graph_and_table(start_date, end_date,
 def regional_update_graph_and_table(start_date, end_date,
                                     selected_regions, selected_provinces, select_spain, selected_covid19,
                                     selected_ine, selected_mobility,
-                                    selected_momo, selected_aemet,
+                                    selected_momo, selected_aemet, selected_plot_scale,
                                     language,
                                     cookies):
     # print(f'{start_date} {end_date} {selected_regions} {selected_covid19} {language}')
     params = locals()
     allcookies = dict(flask.request.cookies)
 
-    if ("convida-dashboard" not in allcookies and len(selected_regions) == 0 and len(selected_provinces) == 0 and len(select_spain) == 0):
+    if ("convida-dashboard" not in allcookies and len(selected_regions) == 0 and len(selected_provinces) == 0 and len(
+            select_spain) == 0):
         select_spain = ["España"]
         if (language == "ES"):
             selected_covid19 = ['Casos diarios']
@@ -2156,6 +2096,8 @@ def regional_update_graph_and_table(start_date, end_date,
         fig = px.box(b, x="Region", y="Dataitems", color="Item")
         fig.update_traces(quartilemethod="exclusive", boxmean=True)
         fig.update_layout(legend=dict(yanchor="top", y=0.99, orientation="h"))
+        fig.update_layout(yaxis=dict(type='linear')) if selected_plot_scale == 'Linear' else fig.update_layout(
+            yaxis=dict(type='log'))
     else:
         fig = None
 
