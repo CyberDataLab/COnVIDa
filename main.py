@@ -1200,11 +1200,11 @@ def update_dropdown_map(selected_covid19, selected_ine, selected_mobility, selec
         State("LANG", "data"),
     ])
 def showby_radioitems(selected_regions, selected_provinces, select_spain, language):
-    if len(selected_regions) > 0 and len(selected_provinces) == 0:
+    if len(selected_regions) > 0 and len(selected_regions) >= len(selected_provinces):
         return ["region"]
-    elif len(selected_provinces) > 0 and len(selected_regions) == 0:
+    elif len(selected_provinces) > 0 and len(selected_provinces) >= len(selected_regions):
         return ["prov"]
-    elif len(selected_regions) == 0 and len(selected_provinces) == 0 and len(select_spain) != 0:
+    elif len(select_spain) != 0:
         return ["spain"]
     else:
         return ['']
