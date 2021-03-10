@@ -1,187 +1,230 @@
 <html>
-    <head>
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width">
-        <meta name="description" content="Herramienta de monitorización de datos de COVID19 en España, con agregación de información de diversas fuentes de datos y análisis por días y por regiones">
-        <meta property="og:image" content="https://convida.inf.um.es/assets/img/favicon.ico">
 
-        <title>COnVIDa: Manual de usuario</title>
-        <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico">
-        <link rel="stylesheet" href="/assets/css/s1.css">
-        <link rel="stylesheet" href="/assets/css/styles.css">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="Herramienta de monitorización de datos de COVID19 en España, con agregación de información de diversas fuentes de datos y análisis por días y por regiones">
+    <meta property="og:image" content="https://convida.inf.um.es/assets/img/favicon.ico">
 
-        <!-- Global site tag (gtag.js) - Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166292510-1"></script>
-        <script>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
+    <title>COnVIDa: Manual de usuario</title>
+    <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico">
+    <link rel="stylesheet" href="/assets/css/s1.css">
+    <link rel="stylesheet" href="/assets/css/styles.css">
 
-          gtag('config', 'UA-166292510-1');
-        </script>
-    </head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166292510-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
 
-    <body>
-        <div id="mainContainer" style="display: flex; flex-direction: column;">
-            <div id="header" class="row flex-display">
-                <div class="one-third column" style="display:block; text-align:center">
-                    <a href="/" target="_self">
-                        <img id="convida-logo" src="/assets/img/convida-logo.png" style="height: 70px;">
-                    </a>
-                </div>
-                <div id="title" class="one-half column">
-                    <div>
-                        <h2>Monitorización de datos de COVID19 en España</p></h2>
-                    </div>
-                </div>
-                <div class="one-third column" style="display:block; text-align:center">
-                    <a href="https://www.um.es" target="_blank">
-                        <img id="umu-logo" src="/assets/img/umu-logo.png" style="height: 60px;">
-                    </a>
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-166292510-1');
+    </script>
+</head>
+
+<body>
+    <div id="mainContainer" style="display: flex; flex-direction: column;">
+        <div id="header" class="row flex-display">
+            <div class="one-third column" style="display:block; text-align:center">
+                <a href="/" target="_self">
+                    <img id="convida-logo" src="/assets/img/convida-logo.png" style="height: 70px;">
+                </a>
+            </div>
+            <div id="title" class="one-half column">
+                <div>
+                    <h2>Monitorización de datos de COVID19 en España</p>
+                    </h2>
                 </div>
             </div>
-            <div id="cross-filter-options" class="pretty_container" style="padding: 20px 40px 40px 40px; text-align: justify;">
-                <div class="help_content">
-                    <h4>Manual de usuario</h4>
+            <div class="one-third column" style="display:block; text-align:center">
+                <a href="https://www.um.es" target="_blank">
+                    <img id="umu-logo" src="/assets/img/umu-logo.png" style="height: 60px;">
+                </a>
+            </div>
+        </div>
+        <div id="cross-filter-options" class="pretty_container" style="padding: 20px 40px 40px 40px; text-align: justify;">
+            <div class="help_content">
+                <h4>Manual de usuario</h4>
 
-                    <div class="help_content_toc">
-                        <ol>
-                            <li><a target="_self" href="#introduction">Introducción</a></li>
-                            <li><a target="_self" href="#how-to-use">Cómo usar COnVIDa</a></li>
-                            <li><a target="_self" href="#data-sources">Fuentes de datos</a></li>
-                            <li><a target="_self" href="#source-code">Código fuente</a></li>
-                            <li><a target="_self" href="#future-versions">Versiones futuras</a></li>
+                <div class="help_content_toc">
+                    <ol>
+                        <li><a target="_self" href="#introduction">Introducción</a></li>
+                        <li><a target="_self" href="#how-to-use">Cómo usar COnVIDa</a></li>
+                        <li><a target="_self" href="#data-sources ">Fuentes de datos</a></li>
+                        <li><a target="_self" href="#source-code ">Código fuente</a></li>
+                        <li><a target="_self" href="#limitations ">Limitaciones</a></li>
+                        <li><a target="_self" href="#references ">Referencias</a></li>
+                    </ol>
+
+                </div>
+                <hr>
+
+                <div id="introduction">
+                    <h5>
+                        1. Introducción
+                    </h5>
+                    <p>
+                        COnVIDa es una herramienta desarrollada por el Laboratorio de Ciberseguridad y Ciencia de Datos de la Unviersidad de Murcia que permite recopilar fácilmente datos relacionados con la pandemia de COVID19 de distintas fuentes de datos, para el caso de España,
+                        y visualizarlos de manera gráfica. Contacte con nosotros a través de <a href="mailto://convida@listas.um.es">convida@listas.um.es</a>.
+                    </p>
+                    <p style="text-align: center;">
+                        <img src="/assets/img/convida-screenshot-es.png" style="padding: 10px 0px 20px 0px; width: 80%;">
+                    </p>
+                </div>
+
+                <div id="how-to-use">
+                    <h5>
+                        2. Cómo usar COnVIDa
+                    </h5>
+                    <p>
+                        Para utilizar la herramienta, en primer lugar deberemos seleccionar el rango de fechas para el cual queremos recolectar datos.
+                    </p>
+                    <p style="text-align: center;">
+                        <img src="/assets/img/convida-screenshot-es-dates.png" style="padding: 10px 0px 20px 0px; width: 80%;">
+                    </p>
+                    <p>
+                        A continuación seleccionaremos las Comunidades Autónomas y/o Provincias de España que nos interesen. También podemos seleccionar 'Añadir España' para estudiar las cifras a nivel nacional en todo país. Hay datos que no se encuentran disponibles a nivel
+                        de Provincia, por lo que no se tendrían en cuenta para esos casos.
+                    </p>
+                    <p style="text-align: center;">
+                        <img src="/assets/img/convida-screenshot-es-regions.png" style="padding: 10px 0px 20px 0px; width: 80%;" ">
+                    </p>
+                    <p>
+                        Para terminar, simplemente seleccionaremos aquellos ítems de datos dentro de cada <a target="_self " href="#data-sources ">fuente de datos (COVID19, INE, Movilidad, MoMo y AEMET)</a> que queramos conocer y automáticamente se mostrarán
+                        todos los datos seleccionados en las gráficas temporales y regionales principales, así como unas respectivas tablas resumen de los mismos. Es importante destacar que al pasar el ratón por encima de cada ítem de datos se nos mostrará una descripción de
+                        los mismos.
+                    </p>
+                    <p style="text-align: center; ">
+                        <img src="/assets/img/convida-screenshot-es-data-sources.png " style="padding: 10px 0px 20px 0px; width: 80%; ">
+                    </p>
+                    <p>
+                        COnVIDa ofrece dos tipos de visualización de datos: temporal y por regiones.<br>
+                        
+                        En la visualización temporal (fíjese en que esté activado el panel) se mostrarán en la gráfica los valores diarios para aquellos datos de tipo temporal de los que se disponga de información (los datos estadísticos del INE no tienen sentido aquí). Por ejemplo, si seleccionamos
+                        los casos de COVID19, los índices de tabaquismo, la movilidad en parques, las defunciones observadas, y la insolación; en Murcia, Madrid, Cuenca, Granada y España en su conjunto; desde el 21/02/2020 hasta el 21/01/2021; 
+                        en el eje X se dividirá en los días entre estas dos fechas, mientras que en el eje Y se mostrarán los tipos de datos seleccionados para esos lugares geográficos. Como los datos pueden tener distinta escala, en la superposición
+                        es posible que unas variables hagan insignificantes a otras, pero en la parte superior derecha se puede explorar en detalle la gráfica interactivamente.
+                    </p>
+                    <p>
+                        
+                    <p style="text-align: center; ">
+                        <img src="/assets/img/convida-screenshot-es-lines-linear-graph.png " style="padding: 10px 0px 20px 0px; width: 80%; ">
+                    </p>
+                    <p>
+                        Adicionalmente, también es posible cambiar el tipo de gráfica, escogiendo entre gráfica de líneas o gráfica de barras.
+                    </p>
+                    <p style="text-align: center; ">
+                        <img src="/assets/img/convida-screenshot-es-bars-linear-graph.png " style="padding: 10px 0px 20px 0px; width: 80%; ">
+                    </p>
+                    <p>
+                        Por su parte,
+                        en la visualización por regiones se subdivide en dos paneles.<br>
+                        En la izquierda, los datos agrupados por regiones seleccionadas y agregados en diagramas de cajas y bigotes (teniendo en cuenta las series de datos para el rango temporal seleccionado). 
+                        Una vez graficados los datos, es posible cambiar fácilmente la escala de la gráfica, o bien lineal, o bien logarítmica. La escala logaritimica es útil para visualizar simultáneamente series de datos con distintos órdenes de magnitud. <br>
+                        En la derecha, se muestra un mapa nacional donde aparecen las regiones seleccionadas y cuyos datos estadísticos se pueden comparar directamente. En el mapa sólo es posible representar a la vez un tipo de granularidad
+                        geográfica (el país entero, comunidades autónomas, o provincias), una medida (la media, máximo, mínimo, o los principales percentiles), y una variable.
+                    </p>
+                    <p style="text-align: center; ">
+                        <img src="/assets/img/convida-screenshot-es-regional.png " style="padding: 10px 0px 20px 0px; width: 80%; ">
+                    </p>
+                    <p>
+                        Por último, cada tabla de resumen muestra, como su propio nombre indica, un resumen estadístico de cada uno de los ítems de datos seleccionados, incluyendo: un conteo de los datos, la media aritmética de los mismos, la desviación típica, el mínimo, el
+                        percentil 25, la mediana, el percentil 75 y el valor máximo de la serie.
+                    </p>
+                    <p style="text-align: center; ">
+                        <img src="/assets/img/convida-screenshot-es-summary-table.png " style="padding: 10px 0px 20px 0px; width: 80%; ">
+                    </p>
+                    <p>
+                        Como se puede observar, se ofrecen dos botones para descargar, o bien todos los datos recolectados según los citerios especificados por el usuario, o bien la tabla resumen. COnVIDa ofrece la posibilidad de descargar cualquiera de estas dos tablas de datos
+                        en los formatos de CSV, XLS, JSON y HTML.
+                    </p>
+                    <p style="text-align: center; ">
+                        <img src="/assets/img/convida-screenshot-es-save-data.png " style="padding: 10px 0px 20px 0px; width: 40%; ">
+                    </p>
+                </div>
+
+                <div id="data-sources ">
+                    <h5>
+                        3. Fuentes de datos
+                    </h5>
+                    <p>
+                        La versión actual de COnVIDa incluye 5 fuentes de datos relacionadas con la pandemia de COVID19 en España. Dichas fuenes son:
+                        <ol style="margin: 5px 40px;
+                            ">
+                            <li><strong>COVID19</strong>: La primera fuente de datos a partir de la cual se puede obtener información relevante sobre la pandemia de COVID19 en España son los propios datos relativos a dicha pandemia publicados por <a target="_blank "
+                                    href="https://github.com/montera34/escovid19data ">Escovid19data en Github</a> (que a su vez obtiene los datos de múltiples fuentes. Tanto de los descargados automáticamente de repositorios de datos abiertos, como los que
+                                se recopilan manualmente en una hoja de cálculo online compartida, así como del <a target="_blank " href="https://www.isciii.es/ ">Instituto de Salud Carlos III</a>). De aquí, COnVIDa toma los datos de los casos, los confirmados
+                                por PCR, los confirmados por tests de anticuerpos, los confirmados por otros tipos de test, los fallecidos, los hospitalizados, los ingresados en UCI, la incidencia acumulada, las vacunas suministradas, etc. </li>
+                            <li><strong>INE</strong>: La segunda fuente de datos relevante contemplada en COnVIDa es la del INE (<a target="_blank " href="https://www.ine.es/ ">Instituto Nacional de Estadística</a>). De esta fuente se obtienen datos tan destacables
+                                como la <a target="_blank " href="https://www.ine.es/jaxi/Tabla.htm?path=/t15/p419/a2017/p06/l0/&file=04013.px ">actividad física</a>, <a target="_blank " href="https://www.ine.es/jaxi/Tabla.htm?path=/t15/p420/a2014/p06/l0/&file=01004.px ">índice de masa corporal (IMC)</a>,
+                                <a target="_blank " href="https://www.ine.es/jaxi/Tabla.htm?path=/t15/p419/a2011/p06/&file=06020.px ">tabaquismo</a>, <a target="_blank " href="https://www.ine.es/jaxi/Tabla.htm?path=/t20/p274/serie/def/p02/l0/&file=02007.px ">hogares por tipo de familia</a>,
+                                <a target="_blank " href="https://www.ine.es/jaxi/Tabla.htm?path=/t20/p274/serie/def/p05/l0/&file=03011.px ">hogares por densidad de ocupación</a> y <a target="_blank " href="https://www.ine.es/jaxi/Tabla.htm?path=/t20/p274/serie/def/p02/l0/&file=02014.px ">mayores de 65 años solos</a>.</li>
+                            <li><strong>Movilidad</strong>: La siguiente fuente de datos incluida en COnVIDa tiene que ver con la movilidad de los ciudadanos. En este caso las fuentes originales de datos en realidad son dos: <a target="_blank
+                            " href="https://www.google.com/covid19/mobility/ ">Google COVID-19 Community Mobility Reports</a>                                y <a target="_blank " href="https://www.apple.com/covid19/mobility ">Apple COVID‑19 - Mobility Trends Reports</a>. De la primera fuente de datos se obtiene la movilidad de los ciudadanos en seis tipos de espacios distintos:
+                                i) supermercados y farmacias, ii) parques, iii) residencial, iv) venta minorista, ocio y cultura, v) transporte público y vi) lugar de trabajo. Por su parte, de la segunda fuente de datos se recupera la movilidad de los
+                                ciudadanos mientras conducen sus vehículos.</li>
+                            <li><strong>MoMo</strong>: Otra fuente de datos con información destacable en la pandemia es el <a target="_blank " href="https://momo.isciii.es/public/momo/dashboard/momo_dashboard.html ">sistema de monotorización de mortalidad MoMo</a>                                gestionado por el Instituto de Salud Carlos III. De esta fuente se obtienen las defunciones observadas diarias por cada región, así como el límite superior e inferior de dicha serie. Adicionalmente, también se recuperan
+                                las defunciones esperadas diariamente por cada región, así como el percentil 1 y el percentil 99 de dicha serie.</li>
+                            <li><strong>AEMET</strong>: Por último, COnVIDa también incluye datos meteorológicos provenientes de la AEMET (<a target="_blank " href="https://opendata.aemet.es ">Agencia Estatal de Meteorología</a>). En concreto, la herramienta
+                                permite consultar valores diarios de precipitación, presión máxima, presión mínima, racha máxima, insolación, temperatura máxima, temperatura media, temperatura mínima, velocidad viento, altitud y dirección racha.</li>
                         </ol>
+                    </p>
+                    <p>
+                        Como se ha comentado anteriormente, al pasar el ratón por encima de cada uno de los ítems de datos, se mostrará automáticamente la descripción de los mismos.
+                    </p>
+                </div>
 
-                    </div>
-                    <hr>
+                <div id="source-code ">
+                    <h5>
+                        4. Código fuente
+                    </h5>
 
-                    <div id="introduction">
-                        <h5>
-                           1. Introducción
-                        </h5>
-                        <p>
-                            COnVIDa es una herramienta desarrollada por el Laboratorio de Ciberseguridad y Ciencia de Datos de la Unviersidad de Murcia que permite recopilar fácilmente datos relacionados con la pandemia de COVID19 de distintas fuentes de datos, para el caso de España, y visualizarlos de manera gráfica. Contacte con nosotros a través de <a href="mailto://convida@listas.um.es">convida@listas.um.es</a>.
-                        </p>
-                        <p style="text-align: center;">
-                            <img src="/assets/img/convida-screenshot-es.png" style="padding: 10px 0px 20px 0px; width: 50%;">
-                        </p>
-                    </div>
+                    <p>
+                        COnVIDa ha sido desarrollado desde su misma concepción como un proyecto de <a target="_blank " href="https://es.wikipedia.org/wiki/Ciencia_abierta
+                            ">Ciencia Abierta</a> con el ánimo y el espíritu de servir y ayudar a quien pueda
+                        necesitarlo en el contexto de la pandemia de COVID19 en España. En este sentido, todo el código fuente del proyecto se encuentra públicamente accesible a través del siguiente repositorio, donde también se incluye un <a target="_blank "
+                            href="https://github.com/CyberDataLab/COnVIDa ">manual del desarrollador</a> (solamente en inglés):
+                    </p>
+                    <p style="text-align:center; margin-top:15px ">
+                        <a target="_blank " href="https://github.com/CyberDataLab/COnVIDa ">https://github.com/CyberDataLab/COnVIDa</a>
+                    </p>
+                </div>
 
-                    <div id="how-to-use">
-                        <h5>
-                           2. Cómo usar COnVIDa
-                        </h5>
-                        <p>
-                            Para utilizar la herramienta, en primer lugar deberemos seleccionar el rango de fechas para el cual queremos recolectar datos.
-                        </p>
-                        <p style="text-align: center;">
-                            <img src="/assets/img/convida-screenshot-es-dates.png">
-                        </p>
-                        <p>
-                            A continuación seleccionaremos la región o regiones de España que nos interesen.
-                        </p>
-                        <p style="text-align: center;">
-                            <img src="/assets/img/convida-screenshot-es-regions.png">
-                        </p>
-                        <p>
-                            Para terminar, simplemente seleccionaremos aquellos ítems de datos dentro de cada <a target="_self" href="#data-sources">fuente de datos (COVID19, INE, Movilidad, MoMo y AEMET)</a> que queramos conocer y automáticamente se mostrarán todos los datos seleccionados en las gráficas principales, así como unas respectivas tablas resumen de los mismos. Es importante destacar que al pasar el ratón por encima de cada ítem de datos se nos mostrará una descripción de los mismos.
-                        </p>
-                        <p style="text-align: center;">
-                            <img src="/assets/img/convida-screenshot-es-data-sources.png">
-                        </p>
-                        <p>
-                            COnVIDa ofrece dos tipos de visualización de datos: temporal y por regiones. En la visualización temporal, se mostrarán en la gráfica los valores diarios para aquellos datos de tipo temporal de los que se disponga de información. Por ejemplo, si seleccionamos los casos de COVID19 en Murcia desde el 21/02/2020 hasta el 18/05/2020, en el eje X se mostraran todos los días entre estas dos fechas, mientras que en el eje Y se mostrarán los casos diarios de COVID19 en Murcia. Por su parte, en  la visualización por regiones se mostrarán los datos agrupados por aquellas regiones que hayamos seleccionado previamente. Algunos datos (por ejemplo los del INE) solamente se visualizan en este tipo de gráfica. Ahora bien, para mostrar ítems de datos de tipo temporal en la visualización por regiones COnVIDa tomará la media aritmética de los datos indicados en el rango de fechas seleccionado y los mostrará por cada región escogida por el usuario.
-                        </p>
-                        <p>
-                            Una vez graficados los datos, es posible cambiar fácilmente la escala de la gráfica, o bien lineal, o bien logarítmica. La escala logaritimica es útil para visualizar simultáneamente series de datos con distintos órdenes de magnitud.
-                        </p>
-                        <p style="text-align: center;">
-                            <img src="/assets/img/convida-screenshot-es-lines-linear-graph.png" style="padding: 10px 150px 20px 0px;">
-                            <img src="/assets/img/convida-screenshot-es-lines-log-graph.png">
-                        </p>
-                        <p>
-                            Adicionalmente, también es posible cambiar el tipo de gráfica, escogiendo entre gráfica de líneas o gráfica de barras.
-                        </p>
-                        <p style="text-align: center;">
-                            <img src="/assets/img/convida-screenshot-es-bars-linear-graph.png" style="padding: 10px 150px 20px 0px;">
-                            <img src="/assets/img/convida-screenshot-es-bars-log-graph.png">
-                        </p>
-                        <p>
-                            Por último, cada tabla de resumen muestra, como su propio nombre indica, un resumen estadístico de cada uno de los ítems de datos seleccionados, incluyendo: un conteo de los datos, la media aritmética de los mismos, la desviación típica, el mínimo, el percentil 25, la mediana, el percentil 75 y el valor máximo de la serie.
-                        </p>
-                        <p style="text-align: center;">
-                            <img src="/assets/img/convida-screenshot-es-summary-table.png" style="width: 50%;">
-                        </p>
-                        <p>
-                            Como se puede observar, se ofrecen dos botones para descargar, o bien todos los datos recolectados según los citerios especificados por el usuario, o bien la tabla resumen. COnVIDa ofrece la posibilidad de descargar cualquiera de estas dos tablas de datos en los formatos de CSV, XLS, JSON y HTML.
-                        </p>
-                        <p style="text-align: center;">
-                            <img src="/assets/img/convida-screenshot-es-save-data.png" style="width: 50%;">
-                        </p>
-                    </div>
+                <div id="limitations ">
+                    <h5>
+                        5. Limitaciones
+                    </h5>
 
-                    <div id="data-sources">
-                        <h5>
-                           3. Fuentes de datos
-                        </h5>
-                        <p>
-                            La versión actual de COnVIDa incluye 5 fuentes de datos relacionadas con la pandemia de COVID19 en España. Dichas fuenes son:
-                            <ol style="margin: 5px 40px;">
-                        <li><strong>COVID19</strong>: La primera fuente de datos a partir de la cual se puede obtener información relevante sobre la pandemia de COVID19 en España son los propios datos relativos a dicha pandemia publicados por <a target="_blank" href="https://github.com/montera34/escovid19data">Escovid19data en Github</a> (que a su vez obtiene los datos de múltiples fuentes. Tanto de los descargados automáticamente de repositorios de datos abiertos, como los que se recopilan manualmente en una hoja de cálculo online compartida. Así como del <a target="_blank" href="https://www.isciii.es/">Instituto de Salud Carlos III</a>). De aquí COnVIDa toma los datos de los casos, los confirmados por PCR, los confirmados por tests de anticuerpos, los confirmados por otros tipos de test, los fallecidos, los hospitalizados, los ingresados en UCI y la incidencia acumulada.</li>
-                                <li><strong>INE</strong>: La segunda fuente de datos relevante contemplada en COnVIDa es la del INE (<a target="_blank" href="https://www.ine.es/">Instituto Nacional de Estadística</a>). De esta fuente se obtienen datos tan destacables como la <a target="_blank" href="https://www.ine.es/jaxi/Tabla.htm?path=/t15/p419/a2017/p06/l0/&file=04013.px">actividad física</a>, <a target="_blank" href="https://www.ine.es/jaxi/Tabla.htm?path=/t15/p420/a2014/p06/l0/&file=01004.px">índice de masa corporal (IMC)</a>, <a target="_blank" href="https://www.ine.es/jaxi/Tabla.htm?path=/t15/p419/a2011/p06/&file=06020.px">tabaquismo</a>, <a target="_blank" href="https://www.ine.es/jaxi/Tabla.htm?path=/t20/p274/serie/def/p02/l0/&file=02007.px">hogares por tipo de familia</a>, <a target="_blank" href="https://www.ine.es/jaxi/Tabla.htm?path=/t20/p274/serie/def/p05/l0/&file=03011.px">hogares por densidad de ocupación</a> y <a target="_blank" href="https://www.ine.es/jaxi/Tabla.htm?path=/t20/p274/serie/def/p02/l0/&file=02014.px">mayores de 65 años solos</a>.</li>
-                                <li><strong>Movilidad</strong>: La siguiente fuente de datos incluida en COnVIDa tiene que ver con la movilidad de los ciudadanos. En este caso las fuentes originales de datos en realidad son dos: <a target="_blank" href="https://www.google.com/covid19/mobility/">Google COVID-19 Community Mobility Reports</a> y <a target="_blank" href="https://www.apple.com/covid19/mobility">Apple COVID‑19 - Mobility Trends Reports</a>. De la primera fuente de datos se obtiene la movilidad de los ciudadanos en seis tipos de espacios distintos: i) supermercados y farmacias, ii) parques, iii) residencial, iv) venta minorista, ocio y cultura, v) transporte público y vi) lugar de trabajo. Por su parte, de la segunda fuente de datos se recupera la movilidad de los ciudadanos mientras conducen sus vehículos.</li>
-                                <li><strong>MoMo</strong>: Otra fuente de datos con información destacable en la pandemia es el <a target="_blank" href="https://momo.isciii.es/public/momo/dashboard/momo_dashboard.html">sistema de monotorización de mortalidad MoMo</a> gestionado por el Instituto de Salud Carlos III. De esta fuente se obtienen las defunciones observadas diarias por cada región, así como el límite superior e inferior de dicha serie. Adicionalmente, también se recuperan las defunciones esperadas diariamente por cada región, así como el percentil 1 y el percentil 99 de dicha serie.</li>
-                                <li><strong>AEMET</strong>: Por último, COnVIDa también incluye datos meteorológicos provenientes de la AEMET (<a target="_blank" href="https://opendata.aemet.es">Agencia Estatal de Meteorología</a>). En concreto, la herramienta permite consultar valores diarios de precipitación, presión máxima, presión mínima, racha máxima, insolación, temperatura máxima, temperatura media, temperatura mínima, velocidad viento, altitud y dirección racha.</li>
-                            </ol>
-                        </p>
-                        <p>
-                            Como se ha comentado anteriormente, al pasar el ratón por encima de cada uno de los ítems de datos, se mostrará automáticamente la descripción de los mismos.
-                        </p>
-                    </div>
+                    <p>
+                        COnVIDa nace desde el Laboratorio de Ciberseguridad y Ciencia de Datos de la Universidad de Murcia (CyberDataLab) como respuesta desinterasada a la situación crítica generada por la pandemia. De esta forma, a pesar de la implicación y capacidades técnicas invertidas, el proyecto cuenta con limitaciones
+                        como la dependencia de fuentes externas para recolectar datos (por lo que pueden fallar o tener valores inválidos), pequeños bugs en la página web, o ciertas impurezas en la visualización de los datos.
+                    </p>
+                </div>
 
-                    <div id="source-code">
-                        <h5>
-                           4. Código fuente
-                        </h5>
-
-                        <p>
-                            COnVIDa ha sido desarrollado desde su misma concepción como un proyecto de <a target="_blank" href="https://es.wikipedia.org/wiki/Ciencia_abierta">Ciencia Abierta</a> con el ánimo y el espíritu de servir y ayudar a quien pueda necesitarlo en el contexto de la pandemia de COVID19 en España. En este sentido, todo el código fuente del proyecto se encuentra públicamente accesible a través del siguiente repositorio, donde también se incluye un <a target="_blank" href="https://github.com/CyberDataLab/COnVIDa">manual del desarrollador</a> (solamente en inglés):
-                        </p>
-                        <p style="text-align:center; margin-top:15px">
-                            <a target="_blank" href="https://github.com/CyberDataLab/COnVIDa">https://github.com/CyberDataLab/COnVIDa</a>
-                        </p>
-                    </div>
-
-                    <div id="future-versions">
-                        <h5>
-                            4. Versiones futuras
-                        </h5>
-                        <p>
-                            En futuras versiones de COnVIDa se espera:
-                            <ul>
-                                <li>Permitir la posibilidad de compartir URL con los resultados obtenidos de una consulta en particular.</li>
-                                <li>Añadir más tablas del INE con datos económicos y sociodemográficos.</li>
-                                <li>Implementar API REST para hacer consultas programáticas al servidor de COnVIDa.</li>
-                                <li>Implementar modelos epidemiológicos de predicción de la evolución de la pandemia.</li>
-                                <li>Permitir autenticación de los usuarios para guardar las últimas consultas, etc.</li>
-                                <li>Permitir que los usuarios puedan subir su propio CSV para compararlo con los datos recuperados por COnVIDa.</li>
-                                <li>Añadir Google Trends como nueva fuente de datos.</li>
-                            </ul>
-                        </p>
-                    </div>
+                <div id="references ">
+                    <h5>
+                        6. Referencias
+                    </h5>
+                    <ul>
+                        <li>E. Martínez Beltrán, M. Quiles Pérez, J. Pastor Galindo, P. Nespoli, F. García Clemente, and F. Gómez Mármol. "COnVIDa: COVID 19 multidisciplinary data collection and dashboard ", under review in Journal of Biomedical Informatics, 2020.</li>
+                    </ul>
                 </div>
             </div>
         </div>
-        <footer class="convida_footer">
-            <div>
-                Proyecto desarrollado por el CyberDataLab de la Universidad de Murcia
-            </div>
-            <div style="display: inline;">
-                Contacte con nosotros a través de
-            </div>
-            <a href="mailto:convida@listas.um.es">convida@listas.um.es</a>
-        </footer>
-    </body>
+    </div>
+    <footer class="convida_footer ">
+        <div>
+            Proyecto desarrollado por el CyberDataLab de la Universidad de Murcia
+        </div>
+        <div style="display: inline; ">
+            Contacte con nosotros a través de
+        </div>
+        <a href="mailto:convida@listas.um.es ">convida@listas.um.es</a>
+    </footer>
+</body>
+
 </html>
