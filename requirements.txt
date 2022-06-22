@@ -2,7 +2,7 @@ dash==1.12.0
 dash-daq==0.5.0
 pandas==1.0.3
 requests==2.23.0
-numpy==1.18.4
+numpy==1.22.0
 urllib3==1.25.9
 dash-bootstrap-components==0.10.0
 uuid==1.30
